@@ -1,0 +1,8 @@
+# Public Assets Folder
+
+Place your static assets here:
+- Logo images (logo.png, logo.svg)
+- Icons
+- Other static files
+
+Files in this folder will be served at the root of your website.

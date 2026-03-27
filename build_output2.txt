@@ -1,0 +1,56 @@
+
+> pixen-india-digital@1.0.0 build
+> next build
+
+  ▲ Next.js 14.2.3
+  - Environments: .env.local
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Linting and checking validity of types ...
+
+./app/page.tsx
+19:13  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+20:13  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./app/pricing/page.tsx
+74:13  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+75:13  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/basic-features/eslint#disabling-rules
+   Collecting page data ...
+   Generating static pages (0/19) ...
+   Generating static pages (4/19) 
+   Generating static pages (9/19) 
+   Generating static pages (14/19) 
+ ✓ Generating static pages (19/19)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                              Size     First Load JS
+┌ ○ /                                    4.46 kB         171 kB
+├ ○ /_not-found                          871 B          87.9 kB
+├ ○ /about                               2.84 kB         169 kB
+├ ƒ /api/contact                         0 B                0 B
+├ ƒ /auth/callback                       0 B                0 B
+├ ○ /case-studies                        2.49 kB         169 kB
+├ ○ /contact                             2.45 kB         169 kB
+├ ○ /dashboard                           233 B           163 kB
+├ ○ /forgot-password                     3.03 kB         169 kB
+├ ○ /login                               3.79 kB         170 kB
+├ ○ /pricing                             3.44 kB         170 kB
+├ ○ /privacy-policy                      233 B           163 kB
+├ ○ /profile                             4.03 kB         170 kB
+├ ○ /services                            2.36 kB         169 kB
+├ ○ /showcase                            233 B           163 kB
+├ ○ /signup                              4.21 kB         170 kB
+└ ○ /terms-of-service                    233 B           163 kB
++ First Load JS shared by all            87 kB
+  ├ chunks/23-a44a1008996a8477.js        31.5 kB
+  ├ chunks/fd9d1056-8a3dfd22a99f48ee.js  53.6 kB
+  └ other shared chunks (total)          1.95 kB
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
