@@ -11,9 +11,14 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
   const { isAuthenticated } = useAuth();
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const navLinks = [
     { href: '/', label: 'Home' },
@@ -86,7 +91,7 @@ export default function Navbar() {
               );
             })}
 
-            {isAuthenticated ? (
+            {isMounted && isAuthenticated ? (
               <div className="flex items-center gap-4">
                 <Link href="/dashboard" className="relative group">
                   <span className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
@@ -109,13 +114,24 @@ export default function Navbar() {
                   Book Consultation
                 </Button>
               </div>
-            ) : (
+            ) : isMounted ? (
               <div className="flex items-center gap-3">
                 <Link href="/login">
                   <span className="text-gray-700 hover:text-primary-600 font-semibold transition-colors">
                     Sign In
                   </span>
                 </Link>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => router.push('/contact')}
+                  className="shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
+                >
+                  Book Consultation
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-3">
                 <Button
                   variant="primary"
                   size="sm"
@@ -168,7 +184,7 @@ export default function Navbar() {
                 );
               })}
 
-              {isAuthenticated ? (
+              {isMounted && isAuthenticated ? (
                 <>
                   <Link
                     href="/dashboard"
