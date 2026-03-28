@@ -9,28 +9,28 @@ export default function AboutPage() {
 
   const team = [
     {
-      name: 'Rajesh Sharma',
+      name: 'Unknown',
       role: 'Founder & CEO',
       bio: '15+ years in digital marketing and business strategy',
-      image: 'RS',
+      image: 'U',
     },
     {
-      name: 'Priya Mehta',
+      name: 'Unknown',
       role: 'Head of Growth Marketing',
       bio: 'Expert in performance marketing and data analytics',
-      image: 'PM',
+      image: 'U',
     },
     {
-      name: 'Amit Kumar',
+      name: 'Unknown',
       role: 'Creative Director',
       bio: 'Award-winning designer with 10+ years experience',
-      image: 'AK',
+      image: 'U',
     },
     {
-      name: 'Sneha Patel',
+      name: 'Unknown',
       role: 'Social Media Strategist',
       bio: 'Built and managed 50+ successful social media campaigns',
-      image: 'SP',
+      image: 'U',
     },
   ];
 
