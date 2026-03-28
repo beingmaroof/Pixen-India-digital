@@ -13,6 +13,14 @@ import { signIn, signInWithGoogle, signInWithFacebook } from '@/lib/auth';
 
 export default function LoginPage() {
   const router = useRouter();
+  
+  // Read redirect destination from URL safely
+  let redirectTo = '/dashboard';
+  if (typeof window !== 'undefined') {
+    const params = new URLSearchParams(window.location.search);
+    redirectTo = params.get('redirect') || '/dashboard';
+  }
+
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
@@ -54,7 +62,7 @@ export default function LoginPage() {
         });
         setLoading(false);
       } else {
-        router.push('/dashboard'); 
+        router.push(redirectTo); 
       }
     } catch (error: any) {
       setErrors({
@@ -67,7 +75,7 @@ export default function LoginPage() {
   const handleGoogleLogin = async () => {
     setLoading(true);
     try {
-      const result = await signInWithGoogle();
+      const result = await signInWithGoogle(redirectTo);
       if (result.error) {
         setErrors({
           submit: result.error.message || 'Failed to sign in with Google'
@@ -86,7 +94,7 @@ export default function LoginPage() {
   const handleFacebookLogin = async () => {
     setLoading(true);
     try {
-      const result = await signInWithFacebook();
+      const result = await signInWithFacebook(redirectTo);
       if (result.error) {
         setErrors({
           submit: result.error.message || 'Failed to sign in with Facebook'

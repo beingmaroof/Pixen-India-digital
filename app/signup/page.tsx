@@ -13,6 +13,14 @@ import { signUp, signInWithGoogle, signInWithFacebook } from '@/lib/auth';
 
 export default function SignupPage() {
   const router = useRouter();
+
+  // Read redirect destination from URL safely
+  let redirectTo = '/dashboard';
+  if (typeof window !== 'undefined') {
+    const params = new URLSearchParams(window.location.search);
+    redirectTo = params.get('redirect') || '/dashboard';
+  }
+
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -79,7 +87,7 @@ export default function SignupPage() {
           submit: result.error.message || 'Failed to create account. Please try again.'
         });
       } else {
-        router.push('/dashboard'); 
+        router.push(redirectTo); 
       }
     } catch (error: any) {
       setErrors({
@@ -93,9 +101,7 @@ export default function SignupPage() {
   const handleGoogleSignup = async () => {
     setLoading(true);
     try {
-      await signInWithGoogle();
-      
-      router.push('/dashboard');
+      await signInWithGoogle(redirectTo);
     } catch (error: any) {
       setErrors({
         submit: error.message || 'Failed to sign up with Google'
@@ -108,9 +114,7 @@ export default function SignupPage() {
   const handleFacebookSignup = async () => {
     setLoading(true);
     try {
-      await signInWithFacebook();
-      
-      router.push('/dashboard');
+      await signInWithFacebook(redirectTo);
     } catch (error: any) {
       setErrors({
         submit: error.message || 'Failed to sign up with Facebook'

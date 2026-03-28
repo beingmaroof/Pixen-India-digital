@@ -100,13 +100,13 @@ export const resetPassword = async (email: string): Promise<{ error: Error | nul
   }
 };
 
-export const signInWithGoogle = async (): Promise<{ user: User | null; session: Session | null; error: Error | null }> => {
+export const signInWithGoogle = async (redirectUrl: string = '/dashboard'): Promise<{ user: User | null; session: Session | null; error: Error | null }> => {
   try {
     const siteUrl = process.env.NEXT_PUBLIC_APP_URL || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${siteUrl}/auth/callback?next=/dashboard`
+        redirectTo: `${siteUrl}/auth/callback?next=${encodeURIComponent(redirectUrl)}`
       }
     });
 
@@ -123,13 +123,13 @@ export const signInWithGoogle = async (): Promise<{ user: User | null; session: 
   }
 };
 
-export const signInWithFacebook = async (): Promise<{ user: User | null; session: Session | null; error: Error | null }> => {
+export const signInWithFacebook = async (redirectUrl: string = '/dashboard'): Promise<{ user: User | null; session: Session | null; error: Error | null }> => {
   try {
     const siteUrl = process.env.NEXT_PUBLIC_APP_URL || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'facebook',
       options: {
-        redirectTo: `${siteUrl}/auth/callback?next=/dashboard`
+        redirectTo: `${siteUrl}/auth/callback?next=${encodeURIComponent(redirectUrl)}`
       }
     });
 
@@ -253,4 +253,45 @@ export const updateUserData = async (uid: string, data: any) => {
   }
 };
 
+// ==========================================
+// BILLING HISTORY LOGIC
+// ==========================================
 
+export const savePayment = async (userId: string, planName: string, amount: string, status: string = 'completed') => {
+  try {
+    const { data, error } = await supabase
+      .from('payments')
+      .insert([
+        {
+          user_id: userId,
+          plan_name: planName,
+          amount,
+          status
+        }
+      ])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error: any) {
+    console.error('Error saving payment:', error);
+    return { data: null, error };
+  }
+};
+
+export const getUserPayments = async (userId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('payments')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error: any) {
+    console.error('Error fetching payments:', error);
+    return { data: null, error };
+  }
+};

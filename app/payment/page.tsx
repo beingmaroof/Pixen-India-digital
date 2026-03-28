@@ -1,25 +1,85 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Navbar, Footer, Section, Container, Button, Badge } from '@/components';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
+import { updateUserData, savePayment } from '@/lib/auth';
+
+const PLAN_DETAILS: Record<string, { name: string, price: string, desc: string, amount: string }> = {
+  starter: { name: 'Starter Plan', price: '₹49,999', amount: '49,999', desc: 'Perfect for small businesses starting their digital journey' },
+  growth: { name: 'Growth Plan', price: '₹99,999', amount: '99,999', desc: 'Ideal for growing businesses ready to scale rapidly' },
+  premium: { name: 'Premium Plan', price: '₹1,99,999', amount: '1,99,999', desc: 'Complete digital transformation for established brands' },
+};
 
 export default function PaymentPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const router = useRouter();
+  const { user, userData, isAuthenticated, loading, refreshUserData } = useAuth();
+  
+  const [planId, setPlanId] = useState('growth');
+  const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '' });
 
-  const handlePayment = (e: React.FormEvent) => {
+  useEffect(() => {
+    // Client-side extraction of URL params
+    const searchParams = new URLSearchParams(window.location.search);
+    const plan = searchParams.get('plan')?.toLowerCase() || 'growth';
+    if (PLAN_DETAILS[plan]) {
+      setPlanId(plan);
+    }
+
+    if (!loading && !isAuthenticated) {
+      router.push(`/login?redirect=/payment?plan=${plan}`);
+    }
+  }, [loading, isAuthenticated, router]);
+
+  useEffect(() => {
+    if (userData) {
+      const names = (userData.display_name || '').split(' ');
+      setFormData({
+        firstName: names[0] || '',
+        lastName: names.slice(1).join(' ') || '',
+        email: userData.email || ''
+      });
+    }
+  }, [userData]);
+
+  const handlePayment = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsProcessing(true);
     
     // Mock processing delay
-    setTimeout(() => {
-      setIsProcessing(false);
-      alert("Payment successful! Welcome to the Growth Plan.");
-      router.push('/dashboard');
+    setTimeout(async () => {
+      try {
+        if (user) {
+          await updateUserData(user.id, { active_plan: PLAN_DETAILS[planId].name, plan_status: 'active' });
+          // Save to payments history
+          await savePayment(user.id, PLAN_DETAILS[planId].name, PLAN_DETAILS[planId].amount, 'Completed');
+          
+          if (refreshUserData) {
+            await refreshUserData();
+          }
+        }
+        setIsProcessing(false);
+        alert(`Payment successful! Welcome to the ${PLAN_DETAILS[planId].name}.`);
+        router.push('/profile');
+      } catch (err) {
+        setIsProcessing(false);
+        alert("Failed to update profile. Please contact support.");
+      }
     }, 2500);
   };
+
+  if (loading || !isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      </div>
+    );
+  }
+
+  const selectedPlan = PLAN_DETAILS[planId];
 
   return (
     <>
@@ -28,6 +88,8 @@ export default function PaymentPage() {
         <Container size="lg">
           <div className="mb-8 flex items-center gap-2 text-sm text-gray-500">
             <Link href="/" className="hover:text-primary-600 transition-colors">Home</Link>
+            <span>/</span>
+            <Link href="/pricing" className="hover:text-primary-600 transition-colors">Pricing</Link>
             <span>/</span>
             <span className="text-gray-900 font-medium">Checkout</span>
           </div>
@@ -38,24 +100,22 @@ export default function PaymentPage() {
             <div className="lg:col-span-5 order-2 lg:order-1 space-y-6">
               <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-200">
                 <Badge variant="primary" className="mb-4">Selected Plan</Badge>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Growth Plan</h2>
-                <p className="text-gray-600 mb-6">Complete digital transformation and scaling for established brands.</p>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">{selectedPlan.name}</h2>
+                <p className="text-gray-600 mb-6">{selectedPlan.desc}</p>
                 
                 <div className="flex items-end gap-2 mb-8">
-                  <span className="text-4xl font-extrabold text-gray-900">₹50,000</span>
+                  <span className="text-4xl font-extrabold text-gray-900">{selectedPlan.price}</span>
                   <span className="text-gray-500 font-medium mb-1">/month</span>
                 </div>
 
                 <div className="space-y-4 pt-6 border-t border-gray-100">
-                  <h3 className="font-semibold text-gray-900">What's included:</h3>
+                  <h3 className="font-semibold text-gray-900">What's included in {selectedPlan.name}:</h3>
                   <ul className="space-y-3">
                     {[
                       'Comprehensive Account Audit',
-                      'Dedicated Strategy Architect',
-                      'Custom Funnel Design',
-                      'Meta & Google Ads Management',
-                      'Weekly Performance Reporting',
-                      '24/7 Priority Support'
+                      'Custom Strategy Dashboard',
+                      'Dedicated Support Channel',
+                      'Performance Reporting'
                     ].map((feature, i) => (
                       <li key={i} className="flex items-start gap-3 text-sm text-gray-700">
                         <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -100,16 +160,16 @@ export default function PaymentPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-xs font-semibold text-gray-700 mb-1.5">First Name</label>
-                        <input type="text" required className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:bg-white transition-all outline-none" placeholder="John" />
+                        <input type="text" readOnly value={formData.firstName} className="w-full px-4 py-3 bg-gray-100 border border-gray-200 text-gray-500 rounded-lg outline-none cursor-not-allowed" />
                       </div>
                       <div>
                         <label className="block text-xs font-semibold text-gray-700 mb-1.5">Last Name</label>
-                        <input type="text" required className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:bg-white transition-all outline-none" placeholder="Doe" />
+                        <input type="text" readOnly value={formData.lastName} className="w-full px-4 py-3 bg-gray-100 border border-gray-200 text-gray-500 rounded-lg outline-none cursor-not-allowed" />
                       </div>
                     </div>
                     <div>
                       <label className="block text-xs font-semibold text-gray-700 mb-1.5">Email Address</label>
-                      <input type="email" required className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:bg-white transition-all outline-none" placeholder="john@company.com" />
+                      <input type="email" readOnly value={formData.email} className="w-full px-4 py-3 bg-gray-100 border border-gray-200 text-gray-500 rounded-lg outline-none cursor-not-allowed" />
                     </div>
                   </div>
 
@@ -169,7 +229,7 @@ export default function PaymentPage() {
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                           </svg>
-                          Pay ₹50,000 & Start Growth
+                          Pay ₹{selectedPlan.amount} & Start Growth
                         </>
                       )}
                     </button>

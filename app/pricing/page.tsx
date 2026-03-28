@@ -3,9 +3,20 @@
 import React from 'react';
 import { Navbar, Footer, Section, Container, Badge, Button } from '@/components';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function PricingPage() {
   const router = useRouter();
+  const { isAuthenticated } = useAuth();
+
+  const handlePurchase = (planName: string) => {
+    const targetUrl = `/payment?plan=${encodeURIComponent(planName.toLowerCase())}`;
+    if (isAuthenticated) {
+      router.push(targetUrl);
+    } else {
+      router.push(`/login?redirect=${encodeURIComponent(targetUrl)}`);
+    }
+  };
 
   const plans = [
     {
@@ -158,7 +169,7 @@ export default function PricingPage() {
                       variant={plan.popular ? 'secondary' : 'primary'}
                       fullWidth
                       size="lg"
-                      onClick={() => router.push('/contact')}
+                      onClick={() => handlePurchase(plan.name)}
                       className={plan.popular ? 'text-primary-700 hover:text-primary-800 shadow-xl' : 'shadow-md'}
                     >
                       {plan.cta}

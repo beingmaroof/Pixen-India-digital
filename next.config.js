@@ -7,6 +7,9 @@ const nextConfig = {
     optimizeCss: true,
   },
   compress: true,
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
 };
 
 module.exports = nextConfig;

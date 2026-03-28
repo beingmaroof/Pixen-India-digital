@@ -10,6 +10,7 @@ import {
   logOut,
   updateUserData,
   getUserData,
+  getUserPayments,
 } from "@/lib/auth";
 
 export default function ProfilePage() {
@@ -38,6 +39,10 @@ export default function ProfilePage() {
   // Logout Modal State
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  // --- Payment History State ---
+  const [payments, setPayments] = useState<any[]>([]);
+  const [loadingPayments, setLoadingPayments] = useState(false);
 
   // 🔥 FIX: Redirect only AFTER loading completes
   useEffect(() => {
@@ -157,6 +162,17 @@ export default function ProfilePage() {
   };
 
   // 🔥 FIX 1: ONLY check loading here
+  // If billing tab opens, fetch history
+  useEffect(() => {
+    if (activeTab === "billing" && user) {
+      setLoadingPayments(true);
+      getUserPayments(user.id).then(({ data }) => {
+        if (data) setPayments(data);
+        setLoadingPayments(false);
+      });
+    }
+  }, [activeTab, user]);
+
   if (loading) {
     return (
       <>
@@ -554,15 +570,19 @@ export default function ProfilePage() {
                           <h3 className="text-lg font-semibold text-gray-900">Current Plan</h3>
                           <p className="text-gray-600 mt-1">Your current subscription plan</p>
                         </div>
-                        <span className="bg-primary-600 text-white px-4 py-2 rounded-full text-sm font-semibold">Active</span>
+                        <span className={`px-4 py-2 rounded-full text-sm font-semibold ${userData?.plan_status === 'active' ? 'bg-primary-600 text-white' : 'bg-gray-200 text-gray-700'}`}>
+                          {userData?.plan_status === 'active' ? 'Active' : 'Free'}
+                        </span>
                       </div>
                       <div className="flex items-end justify-between">
                         <div>
-                          <p className="text-3xl font-bold text-gray-900">Free</p>
-                          <p className="text-sm text-gray-600 mt-1">No active paid subscriptions</p>
+                          <p className="text-3xl font-bold text-gray-900">{userData?.active_plan || 'Free Plan'}</p>
+                          <p className="text-sm text-gray-600 mt-1">
+                            {userData?.active_plan ? 'Renews automatically' : 'No active paid subscriptions'}
+                          </p>
                         </div>
-                        <Link href="/pricing" className="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors font-medium inline-block text-center">
-                          Upgrade Plan
+                        <Link href="/pricing" className="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors font-medium inline-block text-center shadow-md">
+                          {userData?.active_plan ? 'Change Plan' : 'Upgrade Plan'}
                         </Link>
                       </div>
                     </div>
@@ -573,13 +593,40 @@ export default function ProfilePage() {
                         <h3 className="text-lg font-semibold text-gray-900">Payment History</h3>
                       </div>
                       <div className="divide-y divide-gray-200">
-                        <div className="p-6 text-center text-gray-500">
-                          <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                          </svg>
-                          <p className="mt-2 font-medium">No billing history</p>
-                          <p className="text-sm mt-1">When you make purchases, they&apos;ll appear here</p>
-                        </div>
+                        {loadingPayments ? (
+                          <div className="p-6 text-center text-gray-500">
+                            <svg className="animate-spin mx-auto h-8 w-8 text-primary-600 mb-2" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                            </svg>
+                            <p className="font-medium">Loading history...</p>
+                          </div>
+                        ) : payments.length === 0 ? (
+                          <div className="p-6 text-center text-gray-500">
+                            <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <p className="mt-2 font-medium">No billing history</p>
+                            <p className="text-sm mt-1">When you make purchases, they&apos;ll appear here</p>
+                          </div>
+                        ) : (
+                          payments.map((payment) => (
+                            <div key={payment.id} className="p-6 flex items-center justify-between">
+                              <div>
+                                <p className="font-bold text-gray-900">{payment.plan_name}</p>
+                                <p className="text-sm text-gray-500">
+                                  {new Date(payment.created_at).toLocaleDateString()}
+                                </p>
+                              </div>
+                              <div className="text-right">
+                                <p className="font-semibold text-gray-900 text-lg">₹{payment.amount}</p>
+                                <span className={`text-xs px-3 py-1 mt-1 rounded-full font-bold inline-block ${payment.status?.toLowerCase() === 'completed' || payment.status?.toLowerCase() === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                                  {payment.status}
+                                </span>
+                              </div>
+                            </div>
+                          ))
+                        )}
                       </div>
                     </div>
 
@@ -587,7 +634,7 @@ export default function ProfilePage() {
                     <div className="border border-gray-200 rounded-lg p-6">
                       <div className="flex items-center justify-between mb-4">
                         <h3 className="text-lg font-semibold text-gray-900">Payment Methods</h3>
-                        <button className="text-primary-600 hover:text-primary-700 font-medium text-sm">Add Payment Method</button>
+                        <Link href="/payment" className="text-primary-600 hover:text-primary-700 font-medium text-sm">Add Payment Method</Link>
                       </div>
                       <div className="text-center py-8 text-gray-500">
                         <p>No payment methods saved</p>

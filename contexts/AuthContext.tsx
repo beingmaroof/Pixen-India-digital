@@ -21,6 +21,8 @@ interface UserData {
   company?: string;
   job_title?: string;
   location?: string;
+  active_plan?: string;
+  plan_status?: string;
 }
 
 interface AuthContextType {
