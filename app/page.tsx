@@ -5,7 +5,7 @@ import { Navbar, Footer, Button, Container, Section, Card, Badge } from '@/compo
 import SlotCounter from '@/components/SlotCounter';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-console.log("test change");
+
 // GA helper
 const track = (event: string, params?: Record<string, string>) => {
   if (typeof window !== 'undefined' && (window as any).gtag) {
