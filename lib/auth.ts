@@ -89,10 +89,12 @@ export const logOut = async (): Promise<{ error: Error | null }> => {
 
 export const resetPassword = async (email: string): Promise<{ error: Error | null }> => {
   try {
+    const siteUrl = process.env.NEXT_PUBLIC_APP_URL || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`
+      redirectTo: `${siteUrl}/auth/callback?next=/reset-password`
     });
-    return { error };
+    if (error) throw error;
+    return { error: null };
   } catch (error: any) {
     return { error: new Error(error.message || 'Failed to send reset email') };
   }
@@ -100,20 +102,18 @@ export const resetPassword = async (email: string): Promise<{ error: Error | nul
 
 export const signInWithGoogle = async (): Promise<{ user: User | null; session: Session | null; error: Error | null }> => {
   try {
-    const { data, error } = await supabase.auth.signInWithOAuth({
+    const siteUrl = process.env.NEXT_PUBLIC_APP_URL || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/dashboard`
+        redirectTo: `${siteUrl}/auth/callback?next=/dashboard`
       }
     });
 
     if (error) throw error;
 
-    return { 
-      user: null, 
-      session: null, 
-      error: null 
-    };
+    // OAuth redirects the browser away — return null user/session (not an error)
+    return { user: null, session: null, error: null };
   } catch (error: any) {
     return { 
       user: null, 
@@ -125,20 +125,18 @@ export const signInWithGoogle = async (): Promise<{ user: User | null; session: 
 
 export const signInWithFacebook = async (): Promise<{ user: User | null; session: Session | null; error: Error | null }> => {
   try {
-    const { data, error } = await supabase.auth.signInWithOAuth({
+    const siteUrl = process.env.NEXT_PUBLIC_APP_URL || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: 'facebook',
       options: {
-        redirectTo: `${window.location.origin}/dashboard`
+        redirectTo: `${siteUrl}/auth/callback?next=/dashboard`
       }
     });
 
     if (error) throw error;
 
-    return { 
-      user: null, 
-      session: null, 
-      error: null 
-    };
+    // OAuth redirects the browser away — return null user/session (not an error)
+    return { user: null, session: null, error: null };
   } catch (error: any) {
     return { 
       user: null, 

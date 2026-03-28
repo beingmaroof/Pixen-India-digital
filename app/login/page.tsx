@@ -67,14 +67,18 @@ export default function LoginPage() {
   const handleGoogleLogin = async () => {
     setLoading(true);
     try {
-      await signInWithGoogle();
-      
-      router.push('/dashboard');
+      const result = await signInWithGoogle();
+      if (result.error) {
+        setErrors({
+          submit: result.error.message || 'Failed to sign in with Google'
+        });
+        setLoading(false);
+      }
+      // No router.push here — OAuth redirects the browser automatically
     } catch (error: any) {
       setErrors({
         submit: error.message || 'Failed to sign in with Google'
       });
-    } finally {
       setLoading(false);
     }
   };
@@ -82,14 +86,18 @@ export default function LoginPage() {
   const handleFacebookLogin = async () => {
     setLoading(true);
     try {
-      await signInWithFacebook();
-      
-      router.push('/dashboard');
+      const result = await signInWithFacebook();
+      if (result.error) {
+        setErrors({
+          submit: result.error.message || 'Failed to sign in with Facebook'
+        });
+        setLoading(false);
+      }
+      // No router.push here — OAuth redirects the browser automatically
     } catch (error: any) {
       setErrors({
         submit: error.message || 'Failed to sign in with Facebook'
       });
-    } finally {
       setLoading(false);
     }
   };
