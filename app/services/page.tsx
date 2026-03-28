@@ -11,7 +11,7 @@ export default function ServicesPage() {
     {
       title: 'Growth Systems & Revenue Scaling',
       problem: 'Are you burning cash on ads that generate clicks but no qualified leads or sales?',
-      solution: 'We deploy omni-channel paid strategies (Meta, Google, YouTube) backed by rigorous funnel optimization to ensure every dollar spent returns maximum ROI.',
+      solution: 'We deploy omni-channel paid strategies (Meta, Google, YouTube) backed by rigorous funnel optimization to ensure every penny spent returns maximum ROI.',
       outcome: 'Predictable pipeline of qualified prospects, slashed acquisition costs, and exponential revenue growth.',
       icon: (
         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -58,19 +58,19 @@ export default function ServicesPage() {
     <>
       <Navbar />
       <main className="min-h-screen">
-        
+
         <Section padding="xl" bgColor="gray" container={false}>
           <Container size="xl">
             <div className="text-center max-w-4xl mx-auto space-y-6">
               <Badge variant="primary">How We Scale Brands</Badge>
-              
+
               <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-gray-900 leading-tight text-balance">
                 End-to-End Growth{' '}
                 <span className="bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent">
                   Solutions
                 </span>
               </h1>
-              
+
               <p className="text-xl md:text-2xl text-gray-600 leading-relaxed">
                 We don&apos;t sell generic marketing services. We install proven growth systems
                 tailored to rapidly multiply your revenue and brand authority.
