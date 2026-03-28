@@ -6,10 +6,7 @@ export async function POST(req: Request) {
     const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
     if (!supabaseUrl || !supabaseKey) {
-      return NextResponse.json(
-        { error: "Missing env variables" },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: "Missing env" }, { status: 500 });
     }
 
     const { createClient } = await import("@supabase/supabase-js");
@@ -18,17 +15,12 @@ export async function POST(req: Request) {
 
     const body = await req.json();
 
-    const { data, error } = await supabase
-      .from("contacts")
-      .insert([body]);
+    const { error } = await supabase.from("contacts").insert([body]);
 
     if (error) throw error;
 
-    return NextResponse.json({ success: true, data });
+    return NextResponse.json({ success: true });
   } catch (err) {
-    return NextResponse.json(
-      { error: "Something went wrong" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }
