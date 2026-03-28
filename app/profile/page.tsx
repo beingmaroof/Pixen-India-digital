@@ -29,6 +29,16 @@ export default function ProfilePage() {
 
   const [activeTab, setActiveTab] = useState("general");
 
+  // Notifications State
+  const [marketingEmails, setMarketingEmails] = useState(true);
+  const [productUpdates, setProductUpdates] = useState(true);
+  const [newsletter, setNewsletter] = useState(false);
+  const [notifMessage, setNotifMessage] = useState({ text: "", type: "" });
+
+  // Logout Modal State
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
   // 🔥 FIX: Redirect only AFTER loading completes
   useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -51,9 +61,30 @@ export default function ProfilePage() {
     }
   }, [userData]);
 
+  useEffect(() => {
+    // Load notification preferences from localStorage
+    const prefs_str = localStorage.getItem("pixen_notification_prefs");
+    if (prefs_str) {
+      try {
+        const prefs = JSON.parse(prefs_str);
+        if (typeof prefs.marketingEmails !== 'undefined') setMarketingEmails(prefs.marketingEmails);
+        if (typeof prefs.productUpdates !== 'undefined') setProductUpdates(prefs.productUpdates);
+        if (typeof prefs.newsletter !== 'undefined') setNewsletter(prefs.newsletter);
+      } catch (e) {}
+    }
+  }, []);
+
   const handleLogout = async () => {
+    setIsLoggingOut(true);
     await logOut();
     router.push("/");
+  };
+
+  const handleSaveNotifications = () => {
+    const prefs = { marketingEmails, productUpdates, newsletter };
+    localStorage.setItem("pixen_notification_prefs", JSON.stringify(prefs));
+    setNotifMessage({ text: "Preferences saved successfully!", type: "success" });
+    setTimeout(() => setNotifMessage({ text: "", type: "" }), 3000);
   };
 
   const handleSaveProfile = async () => {
@@ -174,9 +205,17 @@ export default function ProfilePage() {
               <button onClick={() => setActiveTab("notifications")} className={`block w-full text-left py-2 px-3 rounded-lg transition-colors ${activeTab === "notifications" ? "bg-primary-100 text-primary-700 font-semibold" : "text-gray-700 hover:bg-gray-100"}`}>Notifications</button>
               <button onClick={() => setActiveTab("billing")} className={`block w-full text-left py-2 px-3 rounded-lg transition-colors ${activeTab === "billing" ? "bg-primary-100 text-primary-700 font-semibold" : "text-gray-700 hover:bg-gray-100"}`}>Billing History</button>
 
-              <button onClick={handleLogout} className="mt-4 text-red-500">
-                Logout
-              </button>
+              <div className="pt-6 mt-4 border-t border-gray-100">
+                <button
+                  onClick={() => setShowLogoutModal(true)}
+                  className="w-full text-center py-2.5 px-4 rounded-xl font-semibold text-red-600 border border-red-200 hover:bg-red-50 hover:border-red-300 transition-all flex items-center justify-center gap-2"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  Log Out
+                </button>
+              </div>
             </div>
 
             {/* Content */}
@@ -440,6 +479,19 @@ export default function ProfilePage() {
                 <>
                   <h2 className="text-2xl font-bold text-gray-900 mb-6">Notification Preferences</h2>
 
+                  {notifMessage.text && (
+                    <div className={`mb-6 p-4 rounded-lg transform transition-all border ${notifMessage.type === "success" ? "bg-green-50 border-green-200 text-green-800" : "bg-red-50 border-red-200 text-red-800"}`}>
+                      <div className="flex items-center gap-2">
+                        {notifMessage.type === "success" && (
+                          <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 11-16 0 8 8 0 0116 0zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                          </svg>
+                        )}
+                        <p className="font-semibold">{notifMessage.text}</p>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="space-y-6">
                     {/* Email Notifications */}
                     <div className="border border-gray-200 rounded-lg p-6">
@@ -451,7 +503,7 @@ export default function ProfilePage() {
                             <p className="text-sm text-gray-600">Receive updates about new features and promotions</p>
                           </div>
                           <label className="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" className="sr-only peer" defaultChecked />
+                            <input type="checkbox" className="sr-only peer" checked={marketingEmails} onChange={(e) => setMarketingEmails(e.target.checked)} />
                             <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
                           </label>
                         </div>
@@ -462,7 +514,7 @@ export default function ProfilePage() {
                             <p className="text-sm text-gray-600">Get notified about important product updates</p>
                           </div>
                           <label className="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" className="sr-only peer" defaultChecked />
+                            <input type="checkbox" className="sr-only peer" checked={productUpdates} onChange={(e) => setProductUpdates(e.target.checked)} />
                             <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
                           </label>
                         </div>
@@ -473,7 +525,7 @@ export default function ProfilePage() {
                             <p className="text-sm text-gray-600">Monthly newsletter with tips and insights</p>
                           </div>
                           <label className="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" className="sr-only peer" />
+                            <input type="checkbox" className="sr-only peer" checked={newsletter} onChange={(e) => setNewsletter(e.target.checked)} />
                             <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
                           </label>
                         </div>
@@ -482,7 +534,7 @@ export default function ProfilePage() {
 
                     {/* Save Preferences */}
                     <div className="pt-4">
-                      <button className="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium">
+                      <button onClick={handleSaveNotifications} className="bg-primary-600 text-white px-6 py-2.5 rounded-lg hover:bg-primary-700 transition-colors shadow-lg hover:shadow-xl font-bold">
                         Save Preferences
                       </button>
                     </div>
@@ -550,6 +602,50 @@ export default function ProfilePage() {
           </div>
         </div>
       </main>
+
+      {/* Logout Confirmation Modal */}
+      {showLogoutModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 animate-scale-in relative border border-gray-100">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-white shadow-sm">
+              <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+            </div>
+            
+            <h3 className="text-xl font-bold text-gray-900 text-center mb-2">Log out of your account?</h3>
+            <p className="text-gray-500 text-center mb-8 text-sm px-4">
+              You will need to sign back in to access your profile and settings.
+            </p>
+            
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={handleLogout}
+                disabled={isLoggingOut}
+                className="w-full flex items-center justify-center py-3 px-4 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition-all shadow-md hover:shadow-lg disabled:bg-red-400"
+              >
+                {isLoggingOut ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    Logging out...
+                  </>
+                ) : 'Sign Out'}
+              </button>
+              
+              <button
+                onClick={() => setShowLogoutModal(false)}
+                disabled={isLoggingOut}
+                className="w-full py-3 px-4 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 font-semibold rounded-xl transition-all disabled:opacity-50"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </>

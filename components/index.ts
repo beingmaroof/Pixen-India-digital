@@ -12,6 +12,8 @@ export { default as CursorFollower } from './CursorFollower';
 export { default as OptimizedImage } from './OptimizedImage';
 export { default as FloatingSocialIcons } from './FloatingSocialIcons';
 export { default as WhatsAppButton } from './WhatsAppButton';
+export { default as CalendlyEmbed } from './CalendlyEmbed';
+
 export { default as AuthButton } from './AuthButton';
 export { default as AuthInput } from './AuthInput';
 export { default as SocialLogin } from './SocialLogin';

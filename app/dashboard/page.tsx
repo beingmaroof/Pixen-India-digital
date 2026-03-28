@@ -1,9 +1,9 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Navbar, Footer } from '@/components';
+import { Navbar, Footer, CalendlyEmbed } from '@/components';
 import { useAuth } from '@/contexts/AuthContext';
 
 const checklistItems = [
@@ -50,6 +50,7 @@ const quickStats = [
 export default function DashboardPage() {
   const { isAuthenticated } = useAuth();
   const router = useRouter();
+  const [isCalendlyOpen, setIsCalendlyOpen] = useState(false);
 
   if (!isAuthenticated) {
     return (
@@ -115,21 +116,37 @@ export default function DashboardPage() {
                       <h3 className="font-semibold text-gray-900 mb-1">{item.title}</h3>
                       <p className="text-sm text-gray-500 leading-relaxed mb-3">{item.desc}</p>
                       {item.external ? (
-                        <a
-                          href={item.href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={`inline-flex items-center gap-2 text-sm font-semibold transition-colors ${
-                            item.color === 'accent' ? 'text-accent-600 hover:text-accent-700' :
-                            item.color === 'green' ? 'text-green-600 hover:text-green-700' :
-                            'text-primary-600 hover:text-primary-700'
-                          }`}
-                        >
-                          {item.action}
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                          </svg>
-                        </a>
+                        item.id === 2 ? (
+                          <button
+                            onClick={() => setIsCalendlyOpen(true)}
+                            className={`inline-flex items-center gap-2 text-sm font-semibold transition-colors bg-transparent border-none p-0 cursor-pointer ${
+                              item.color === 'accent' ? 'text-accent-600 hover:text-accent-700' :
+                              item.color === 'green' ? 'text-green-600 hover:text-green-700' :
+                              'text-primary-600 hover:text-primary-700'
+                            }`}
+                          >
+                            {item.action}
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                          </button>
+                        ) : (
+                          <a
+                            href={item.href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`inline-flex items-center gap-2 text-sm font-semibold transition-colors ${
+                              item.color === 'accent' ? 'text-accent-600 hover:text-accent-700' :
+                              item.color === 'green' ? 'text-green-600 hover:text-green-700' :
+                              'text-primary-600 hover:text-primary-700'
+                            }`}
+                          >
+                            {item.action}
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                          </a>
+                        )
                       ) : (
                         <Link
                           href={item.href}
@@ -183,6 +200,9 @@ export default function DashboardPage() {
           </div>
         </div>
       </main>
+      
+      <CalendlyEmbed isOpen={isCalendlyOpen} onClose={() => setIsCalendlyOpen(false)} />
+      
       <Footer />
     </>
   );

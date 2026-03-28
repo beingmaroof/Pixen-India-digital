@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import CalendlyEmbed from './CalendlyEmbed';
 
 interface FormData {
   // Step 1
@@ -40,6 +41,7 @@ const STEPS = [
 
 export default function ContactForm() {
   const [step, setStep] = useState(1);
+  const [isCalendlyOpen, setIsCalendlyOpen] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     name: '', email: '', phone: '',
     businessType: '', budget: '',
@@ -137,6 +139,7 @@ export default function ContactForm() {
   // --- Success State ---
   if (submitStatus === 'success') {
     return (
+      <>
       <div className="w-full max-w-2xl mx-auto text-center py-12 px-8 bg-white rounded-2xl shadow-lg border border-green-100">
         <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
           <svg className="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -163,17 +166,15 @@ export default function ContactForm() {
             </svg>
             Chat directly on WhatsApp
           </a>
-          <a
-            href="https://calendly.com/pixenindia/free-consultation"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-3 text-primary-700 font-semibold hover:text-primary-800 transition-colors"
+          <button
+            onClick={() => setIsCalendlyOpen(true)}
+            className="w-full flex items-center gap-3 text-primary-700 font-semibold hover:text-primary-800 transition-colors bg-transparent border-0 cursor-pointer"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
             Book your strategy call immediately
-          </a>
+          </button>
         </div>
         <button
           onClick={() => { setSubmitStatus('idle'); setStep(1); setFormData({ name: '', email: '', phone: '', businessType: '', budget: '', message: '' }); }}
@@ -182,6 +183,8 @@ export default function ContactForm() {
           Submit another request
         </button>
       </div>
+      <CalendlyEmbed isOpen={isCalendlyOpen} onClose={() => setIsCalendlyOpen(false)} />
+      </>
     );
   }
 
@@ -192,7 +195,7 @@ export default function ContactForm() {
     <div className="w-full max-w-2xl mx-auto">
       {/* Progress Bar */}
       <div className="mb-8">
-        <div className="flex items-center justify-between mb-3">
+        <div className="relative flex items-center justify-between mb-3">
           {STEPS.map((s, i) => (
             <div key={i} className="flex flex-col items-center flex-1">
               <div className={`relative z-10 w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 ${
@@ -212,7 +215,7 @@ export default function ContactForm() {
             </div>
           ))}
           {/* Connecting lines */}
-          <div className="absolute left-0 right-0 flex items-center pointer-events-none" style={{ paddingLeft: '12.5%', paddingRight: '12.5%', marginTop: '-28px' }}>
+          <div className="absolute left-0 right-0 flex items-center pointer-events-none -z-10" style={{ paddingLeft: '16.5%', paddingRight: '16.5%', top: '18px' }}>
             <div className="flex-1 h-0.5 bg-gray-100 relative">
               <div className="absolute inset-0 bg-primary-500 transition-all duration-500" style={{ width: `${((step - 1) / (STEPS.length - 1)) * 100}%` }} />
             </div>

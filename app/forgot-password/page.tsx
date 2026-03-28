@@ -154,7 +154,7 @@ export default function ForgotPasswordPage() {
               <div className="mt-8 text-center space-y-2">
                 <p className="text-sm text-gray-600">
                   Need help?{' '}
-                  <Link href="/contact" className="font-semibold text-primary-600 hover:text-primary-700 underline">
+                  <Link href="/support" className="font-semibold text-primary-600 hover:text-primary-700 underline">
                     Contact Support
                   </Link>
                 </p>

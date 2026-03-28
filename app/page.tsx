@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Navbar, Footer, Button, Container, Section, Card, Badge } from '@/components';
+import { Navbar, Footer, Button, Container, Section, Card, Badge, CalendlyEmbed } from '@/components';
 import SlotCounter from '@/components/SlotCounter';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -167,6 +167,7 @@ const processSteps = [
 
 export default function Home() {
   const router = useRouter();
+  const [isCalendlyOpen, setIsCalendlyOpen] = useState(false);
 
   return (
     <>
@@ -541,7 +542,7 @@ export default function Home() {
                 size="lg"
                 onClick={() => {
                   track('cta_click', { location: 'mid_page', label: 'book_call' });
-                  window.open('https://calendly.com/pixenindia/free-consultation', '_blank');
+                  setIsCalendlyOpen(true);
                 }}
                 className="flex-shrink-0 shadow-xl"
               >
