@@ -64,13 +64,7 @@ export const metadata: Metadata = {
     canonical: siteUrl,
   },
   icons: {
-    icon: [
-      { url: '/favicon.ico', sizes: '48x48', type: 'image/x-icon' },
-      { url: '/favicon.ico', sizes: '32x32', type: 'image/x-icon' },
-      { url: '/favicon.ico', sizes: '16x16', type: 'image/x-icon' },
-    ],
-    shortcut: '/favicon.ico',
-    apple: '/favicon.ico',
+    icon: '/favicon.ico',
   },
 };
 
@@ -108,6 +102,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <link rel="icon" href="/favicon.ico" type="image/x-icon" sizes="any" />
+        
         {/* Google Analytics */}
         {process.env.NEXT_PUBLIC_GA_ID && (
           <>
