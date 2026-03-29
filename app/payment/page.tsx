@@ -349,12 +349,17 @@ export default function PaymentPage() {
                       )}
                     </button>
 
-                    <p className="text-center text-xs text-gray-400 mt-4">
-                      By clicking, you agree to our{' '}
-                      <Link href="/terms-of-service" className="underline hover:text-gray-600">Terms of Service</Link>
-                      {' '}and{' '}
-                      <Link href="/privacy-policy" className="underline hover:text-gray-600">Privacy Policy</Link>.
-                    </p>
+                    <div className="mt-6 text-center text-xs text-gray-500 space-y-2">
+                      <p>
+                        By clicking "Pay via Razorpay", you explicitly agree to our{' '}
+                        <Link href="/terms" className="text-gray-700 underline hover:text-primary-600 transition-colors">Terms & Conditions</Link>,{' '}
+                        <Link href="/privacy-policy" className="text-gray-700 underline hover:text-primary-600 transition-colors">Privacy Policy</Link>, and our{' '}
+                        <Link href="/refund-policy" className="text-gray-700 underline hover:text-primary-600 transition-colors">Strictly No Refund Policy</Link>.
+                      </p>
+                      <p className="text-gray-400">
+                        All services are delivered digitally. <Link href="/shipping-policy" className="underline hover:text-gray-500 hover:text-primary-600 transition-colors">No physical products will be shipped.</Link>
+                      </p>
+                    </div>
                   </form>
                 </div>
               </div>

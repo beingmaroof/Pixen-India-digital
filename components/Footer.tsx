@@ -24,7 +24,11 @@ export default function Footer() {
 
   const legalLinks = [
     { href: '/privacy-policy', label: 'Privacy Policy' },
-    { href: '/terms-of-service', label: 'Terms of Service' },
+    { href: '/terms', label: 'Terms & Conditions' },
+    { href: '/refund-policy', label: 'Refund Policy' },
+    { href: '/cancellation-policy', label: 'Cancellation Policy' },
+    { href: '/disclaimer', label: 'Disclaimer' },
+    { href: '/shipping-policy', label: 'Shipping Policy' },
   ];
 
   return (
@@ -165,12 +169,12 @@ export default function Footer() {
             <p className="text-gray-400 text-sm text-center md:text-left">
               &copy; {currentYear} Pixen India Digital. All rights reserved.
             </p>
-            <div className="flex gap-6">
+            <div className="flex flex-wrap justify-center md:justify-end gap-x-6 gap-y-2">
               {legalLinks.map((link, index) => (
                 <Link
                   key={index}
                   href={link.href}
-                  className="text-gray-400 hover:text-white text-sm transition-colors duration-200"
+                  className="text-gray-400 hover:text-white text-xs md:text-sm transition-colors duration-200"
                 >
                   {link.label}
                 </Link>
