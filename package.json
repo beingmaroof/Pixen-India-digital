@@ -14,6 +14,7 @@
     "@types/nodemailer": "^7.0.11",
     "@vercel/speed-insights": "^2.0.0",
     "critters": "^0.0.23",
+    "framer-motion": "^12.38.0",
     "next": "^14.2.35",
     "nodemailer": "^8.0.4",
     "razorpay": "^2.9.6",

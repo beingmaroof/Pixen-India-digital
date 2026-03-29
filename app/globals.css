@@ -9,12 +9,28 @@
 
 
 :root {
-  --foreground-rgb: 15, 23, 42;
+  --foreground-rgb: 255, 255, 255;
+  --brand-purple: #A855F7;
+  --brand-blue: #3B82F6;
+  --brand-cyan: #00D6FF;
+  --bg-primary: #050815;
+  --bg-secondary: #02030A;
 }
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Dark scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #050815; }
+::-webkit-scrollbar-thumb { background: #A855F7; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #9333EA; }
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: #ffffff;
+  background: linear-gradient(180deg, #050815 0%, #02030A 100%);
+  min-height: 100vh;
 }
 
 @layer utilities {

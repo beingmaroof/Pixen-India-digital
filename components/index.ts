@@ -1,5 +1,7 @@
 // Components barrel export
 export { default as Navbar } from './Navbar';
+export { default as PremiumNavbar } from './PremiumNavbar';
+export { default as ScrollStorySection } from './ScrollStorySection';
 export { default as Footer } from './Footer';
 export { default as Button } from './Button';
 export { default as Container } from './Container';
