@@ -11,7 +11,7 @@ export default function AvatarMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
-  const { user, userData } = useAuth();
+  const { user, userData, loading } = useAuth();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

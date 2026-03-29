@@ -209,9 +209,17 @@ export default function ProfilePage() {
                 <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-6 sticky top-32">
                   <div className="text-center mb-8 pb-8 border-b border-white/10 relative">
                     <div className="w-20 h-20 bg-gradient-to-br from-purple-500/20 to-blue-500/20 border border-white/20 rounded-full flex items-center justify-center text-2xl font-extrabold text-white mx-auto shadow-[0_0_30px_rgba(168,85,247,0.2)]">
-                      {user?.email?.charAt(0).toUpperCase()}
+                      {(loading || !userData) ? (
+                        <div className="w-full h-full rounded-full animate-pulse bg-white/10" />
+                      ) : (
+                        userData?.display_name ? userData.display_name.charAt(0).toUpperCase() : user?.email?.charAt(0).toUpperCase()
+                      )}
                     </div>
-                    <p className="mt-4 text-sm font-medium text-white/60 break-all">{user?.email}</p>
+                    {(loading || !userData) ? (
+                      <div className="h-4 w-32 bg-white/10 animate-pulse rounded mx-auto mt-4"></div>
+                    ) : (
+                      <p className="mt-4 text-sm font-medium text-white/60 break-all">{userData?.display_name || user?.email}</p>
+                    )}
                     <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-[1px] bg-gradient-to-r from-transparent via-purple-500/50 to-transparent" />
                   </div>
 

@@ -17,7 +17,7 @@ export default function Navbar() {
   const [isMounted, setIsMounted] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
 
   useEffect(() => {
     setIsMounted(true);
@@ -95,44 +95,44 @@ export default function Navbar() {
               );
             })}
 
-            {isMounted && isAuthenticated ? (
-              <div className="flex items-center gap-6">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsCalendlyOpen(true)}
-                  className="shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
-                >
-                  Book Consultation
-                </Button>
-                <AvatarMenu />
-              </div>
-            ) : isMounted ? (
-              <div className="flex items-center gap-3">
-                <Link href="/login">
-                  <span className="text-gray-700 hover:text-primary-600 font-semibold transition-colors">
-                    Sign In
-                  </span>
-                </Link>
-                <Button
-                  variant="primary"
-                  size="sm"
-                  onClick={() => setIsCalendlyOpen(true)}
-                  className="shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
-                >
-                  Book Consultation
-                </Button>
-              </div>
+            {isMounted ? (
+              loading ? (
+                <div className="flex items-center gap-4 opacity-70">
+                  <div className="w-16 h-4 bg-white/10 rounded animate-pulse" />
+                  <div className="w-32 h-9 bg-white/10 rounded-full animate-pulse" />
+                </div>
+              ) : isAuthenticated ? (
+                <div className="flex items-center gap-6">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsCalendlyOpen(true)}
+                    className="shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
+                  >
+                    Book Consultation
+                  </Button>
+                  <AvatarMenu />
+                </div>
+              ) : (
+                <div className="flex items-center gap-3">
+                  <Link href="/login">
+                    <span className="text-gray-700 hover:text-primary-600 font-semibold transition-colors">
+                      Sign In
+                    </span>
+                  </Link>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => setIsCalendlyOpen(true)}
+                    className="shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
+                  >
+                    Book Consultation
+                  </Button>
+                </div>
+              )
             ) : (
-              <div className="flex items-center gap-3">
-                <Button
-                  variant="primary"
-                  size="sm"
-                  onClick={() => setIsCalendlyOpen(true)}
-                  className="shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
-                >
-                  Book Consultation
-                </Button>
+              <div className="flex items-center gap-3 opacity-0 pointer-events-none">
+                <Button variant="primary" size="sm">Book Consultation</Button>
               </div>
             )}
           </div>
@@ -177,7 +177,13 @@ export default function Navbar() {
                 );
               })}
 
-              {isMounted && isAuthenticated ? (
+              {isMounted && loading && (
+                <div className="flex flex-col gap-4 py-3 px-4 animate-pulse">
+                  <div className="w-full h-12 bg-white/10 rounded-full" />
+                  <div className="w-full h-12 bg-white/10 rounded-full" />
+                </div>
+              )}
+              {isMounted && !loading && isAuthenticated && (
                 <>
                   <div className="flex items-center gap-4 py-3 px-4">
                     <AvatarMenu />
@@ -196,7 +202,8 @@ export default function Navbar() {
                     Book Consultation
                   </Button>
                 </>
-              ) : (
+              )}
+              {isMounted && !loading && !isAuthenticated && (
                 <>
                   <Link
                     href="/login"

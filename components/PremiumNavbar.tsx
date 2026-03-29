@@ -22,7 +22,7 @@ export default function PremiumNavbar() {
   const [isCalendlyOpen, setIsCalendlyOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const pathname = usePathname();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
 
   useEffect(() => {
     setIsMounted(true);
@@ -85,34 +85,39 @@ export default function PremiumNavbar() {
             </div>
 
             {/* Right CTA */}
-            <div className="hidden md:flex items-center gap-4">
-              {isMounted && isAuthenticated ? (
-                <>
-                  <button
-                    onClick={() => setIsCalendlyOpen(true)}
-                    className="text-sm font-medium text-white/70 hover:text-white transition-colors"
-                  >
-                    Book Call
-                  </button>
-                  <AvatarMenu />
-                </>
-              ) : (
-                <>
-                  {isMounted && (
+            <div className="hidden md:flex items-center gap-4 min-w-[150px] justify-end">
+              {isMounted ? (
+                loading ? (
+                  <div className="flex items-center gap-4 opacity-70">
+                    <div className="w-16 h-4 bg-white/10 rounded animate-pulse" />
+                    <div className="w-32 h-9 bg-white/10 rounded-full animate-pulse" />
+                  </div>
+                ) : isAuthenticated ? (
+                  <>
+                    <button
+                      onClick={() => setIsCalendlyOpen(true)}
+                      className="text-sm font-medium text-white/70 hover:text-white transition-colors"
+                    >
+                      Book Call
+                    </button>
+                    <AvatarMenu />
+                  </>
+                ) : (
+                  <>
                     <Link href="/login" className="text-sm font-medium text-white/60 hover:text-white transition-colors">
                       Sign In
                     </Link>
-                  )}
-                  <button
-                    onClick={() => setIsCalendlyOpen(true)}
-                    className="relative px-5 py-2 rounded-full text-sm font-semibold text-white overflow-hidden group transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/30 hover:-translate-y-0.5"
-                  >
-                    <span className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-500 transition-opacity duration-300" />
-                    <span className="absolute inset-0 bg-gradient-to-r from-purple-500 to-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    <span className="relative">Get Free Audit</span>
-                  </button>
-                </>
-              )}
+                    <button
+                      onClick={() => setIsCalendlyOpen(true)}
+                      className="relative px-5 py-2 rounded-full text-sm font-semibold text-white overflow-hidden group transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/30 hover:-translate-y-0.5"
+                    >
+                      <span className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-500 transition-opacity duration-300" />
+                      <span className="absolute inset-0 bg-gradient-to-r from-purple-500 to-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      <span className="relative">Get Free Audit</span>
+                    </button>
+                  </>
+                )
+              ) : null}
             </div>
 
             {/* Hamburger — mobile */}
@@ -148,15 +153,18 @@ export default function PremiumNavbar() {
             ))}
           </div>
           <div className="mt-auto flex flex-col gap-4">
-            {isMounted && !isAuthenticated && (
-              <Link href="/login" onClick={() => setMobileOpen(false)} className="text-center text-white/60 hover:text-white transition-colors font-medium">
+            {isMounted && loading && (
+                <div className="w-full h-12 bg-white/10 rounded-full animate-pulse" />
+            )}
+            {isMounted && !loading && !isAuthenticated && (
+              <Link href="/login" onClick={() => setMobileOpen(false)} className="text-center text-white/60 hover:text-white transition-colors font-medium py-2">
                 Sign In
               </Link>
             )}
-            {isMounted && isAuthenticated && <AvatarMenu />}
+            {isMounted && !loading && isAuthenticated && <AvatarMenu />}
             <button
               onClick={() => { setMobileOpen(false); setIsCalendlyOpen(true); }}
-              className="w-full py-3 rounded-full font-semibold text-white bg-gradient-to-r from-purple-600 to-blue-500 hover:opacity-90 transition-opacity"
+              className="w-full py-3.5 rounded-full font-bold text-white bg-gradient-to-r from-purple-600 to-blue-500 hover:opacity-90 transition-opacity shadow-[0_0_20px_rgba(168,85,247,0.3)]"
             >
               Get Free Audit
             </button>
