@@ -223,7 +223,7 @@ export default function Home() {
                 }
                 onClick={() => {
                   track('cta_click', { location: 'hero', label: 'get_free_audit' });
-                  router.push('/contact');
+                  setIsCalendlyOpen(true);
                 }}
                 className="shadow-xl"
               >
@@ -372,7 +372,7 @@ export default function Home() {
                 size="lg"
                 onClick={() => {
                   track('cta_click', { location: 'process', label: 'start_audit' });
-                  router.push('/contact');
+                  setIsCalendlyOpen(true);
                 }}
               >
                 Start With a Free Audit
@@ -597,7 +597,7 @@ export default function Home() {
                   }
                   onClick={() => {
                     track('cta_click', { location: 'final_cta', label: 'claim_audit' });
-                    router.push('/contact');
+                    setIsCalendlyOpen(true);
                   }}
                   className="shadow-2xl hover:shadow-3xl transform hover:-translate-y-1 transition-all duration-300 px-8 py-4 text-lg font-bold"
                 >
@@ -620,6 +620,7 @@ export default function Home() {
         </Section>
 
         <Footer />
+        <CalendlyEmbed isOpen={isCalendlyOpen} onClose={() => setIsCalendlyOpen(false)} />
       </main>
     </>
   );

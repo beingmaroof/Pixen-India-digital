@@ -14,12 +14,12 @@ export default function Footer() {
     { href: '/services', label: 'Digital Architecture' },
   ];
 
-  const companyLinks = [
+  const companyLinks: { href: string; label: string; target?: string }[] = [
     { href: '/case-studies', label: 'Case Studies' },
     { href: '/pricing', label: 'Pricing' },
     { href: '/about', label: 'About Us' },
     { href: '/contact', label: 'Contact' },
-    { href: 'https://pixenindia.com/blog', target: '_blank', label: 'Blog' },
+    { href: '/blog', label: 'Blog' },
   ];
 
   const legalLinks = [

@@ -5,6 +5,8 @@ import Script from "next/script";
 import { AuthProvider } from '@/contexts/AuthContext';
 import FloatingSocialIcons from '@/components/FloatingSocialIcons';
 import CursorFollower from '@/components/CursorFollower';
+import { Toaster } from 'react-hot-toast';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], display: 'swap' });
@@ -161,7 +163,20 @@ export default function RootLayout({
       <body className={inter.className}>
         <AuthProvider>
           <CursorFollower />
-          {children}
+          <Toaster 
+            position="bottom-right" 
+            toastOptions={{ 
+              duration: 5000,
+              style: {
+                background: '#333',
+                color: '#fff',
+                borderRadius: '10px',
+              }
+            }} 
+          />
+          <ErrorBoundary>
+            {children}
+          </ErrorBoundary>
           <FloatingSocialIcons
             instagramUrl="https://www.instagram.com/pixenindiadigital/"
             whatsappUrl="https://wa.me/917827717445"

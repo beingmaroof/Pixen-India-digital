@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import CalendlyEmbed from './CalendlyEmbed';
+import toast from 'react-hot-toast';
 
 interface FormData {
   // Step 1
@@ -124,14 +125,28 @@ export default function ContactForm() {
 
       if (response.ok) {
         trackEvent('lead_conversion', { value: formData.budget });
+        toast.success('Your request has been submitted');
+        // Fire confirmation email (non-blocking)
+        fetch('/api/send-confirmation', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            to: formData.email,
+            name: formData.name,
+            type: 'contact_confirmation',
+          }),
+        }).catch(() => {}); // swallow errors — non-critical
         setSubmitStatus('success');
       } else {
         const err = await response.json().catch(() => ({}));
-        setSubmitError(err?.error || 'Something went wrong. Please try again.');
+        const errMsg = err?.error || 'Something went wrong';
+        setSubmitError(errMsg);
+        toast.error(errMsg);
         setSubmitStatus('error');
       }
     } catch {
-      setSubmitError('Network error. Please check your connection and try again.');
+      setSubmitError('Network error. Please try again.');
+      toast.error('Network error. Please try again.');
       setSubmitStatus('error');
     }
   };

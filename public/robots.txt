@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+# Disallow private routes
+Disallow: /dashboard
+Disallow: /profile
+Disallow: /api/
+
+# Sitemaps
+Sitemap: https://pixenindia.com/sitemap.xml

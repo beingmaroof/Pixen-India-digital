@@ -1,75 +1,106 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Navbar, Footer, Section, Container, Button, Badge } from '@/components';
+import { Navbar, Footer, Container, Badge } from '@/components';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { updateUserData, savePayment } from '@/lib/auth';
+import toast from 'react-hot-toast';
 
-const PLAN_DETAILS: Record<string, { name: string, price: string, desc: string, amount: string }> = {
-  starter: { name: 'Starter Plan', price: '₹49,999', amount: '49,999', desc: 'Perfect for small businesses starting their digital journey' },
-  growth: { name: 'Growth Plan', price: '₹99,999', amount: '99,999', desc: 'Ideal for growing businesses ready to scale rapidly' },
-  premium: { name: 'Premium Plan', price: '₹1,99,999', amount: '1,99,999', desc: 'Complete digital transformation for established brands' },
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
+
+const PLAN_DETAILS: Record<string, {
+  name: string;
+  price: string;
+  amount: string;
+  numericAmount: number;
+  desc: string;
+  features: string[];
+}> = {
+  starter: {
+    name: 'Starter Plan',
+    price: '₹49,999',
+    amount: '49,999',
+    numericAmount: 4999900,
+    desc: 'Perfect for small businesses starting their digital journey',
+    features: [
+      'Social Media Management (2 platforms)',
+      '8 Posts per month',
+      'Basic Google Ads Campaign',
+      'Monthly Performance Report',
+      'Email Support',
+      'Dedicated Account Manager',
+    ],
+  },
+  growth: {
+    name: 'Growth Plan',
+    price: '₹99,999',
+    amount: '99,999',
+    numericAmount: 9999900,
+    desc: 'Ideal for growing businesses ready to scale rapidly',
+    features: [
+      'Everything in Starter +',
+      'Social Media Management (4 platforms)',
+      '16 Posts/month + Reels',
+      'Google + Meta Ads Management',
+      'SEO Optimization',
+      'Bi-weekly Strategy Calls',
+      'Advanced Analytics Dashboard',
+      'Priority Support',
+    ],
+  },
+  premium: {
+    name: 'Premium Plan',
+    price: '₹1,99,999',
+    amount: '1,99,999',
+    numericAmount: 19999900,
+    desc: 'Complete digital transformation for established brands',
+    features: [
+      'Everything in Growth +',
+      'Unlimited Social Media Platforms',
+      'Daily Content Creation',
+      'Influencer Marketing Campaign',
+      'Complete Website Optimization',
+      'Weekly Strategy Sessions',
+      'Custom CRM Integration',
+      '24/7 Priority Support',
+    ],
+  },
 };
+
+function loadRazorpayScript(): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (typeof window !== 'undefined' && window.Razorpay) {
+      resolve(true);
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+}
 
 export default function PaymentPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const router = useRouter();
   const { user, userData, isAuthenticated, loading, refreshUserData } = useAuth();
-  
   const [planId, setPlanId] = useState('growth');
-  const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '' });
 
   useEffect(() => {
-    // Client-side extraction of URL params
     const searchParams = new URLSearchParams(window.location.search);
     const plan = searchParams.get('plan')?.toLowerCase() || 'growth';
-    if (PLAN_DETAILS[plan]) {
-      setPlanId(plan);
-    }
-
+    if (PLAN_DETAILS[plan]) setPlanId(plan);
     if (!loading && !isAuthenticated) {
       router.push(`/login?redirect=/payment?plan=${plan}`);
     }
   }, [loading, isAuthenticated, router]);
-
-  useEffect(() => {
-    if (userData) {
-      const names = (userData.display_name || '').split(' ');
-      setFormData({
-        firstName: names[0] || '',
-        lastName: names.slice(1).join(' ') || '',
-        email: userData.email || ''
-      });
-    }
-  }, [userData]);
-
-  const handlePayment = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsProcessing(true);
-    
-    // Mock processing delay
-    setTimeout(async () => {
-      try {
-        if (user) {
-          await updateUserData(user.id, { active_plan: PLAN_DETAILS[planId].name, plan_status: 'active' });
-          // Save to payments history
-          await savePayment(user.id, PLAN_DETAILS[planId].name, PLAN_DETAILS[planId].amount, 'Completed');
-          
-          if (refreshUserData) {
-            await refreshUserData();
-          }
-        }
-        setIsProcessing(false);
-        alert(`Payment successful! Welcome to the ${PLAN_DETAILS[planId].name}.`);
-        router.push('/profile');
-      } catch (err) {
-        setIsProcessing(false);
-        alert("Failed to update profile. Please contact support.");
-      }
-    }, 2500);
-  };
 
   if (loading || !isAuthenticated) {
     return (
@@ -80,12 +111,116 @@ export default function PaymentPage() {
   }
 
   const selectedPlan = PLAN_DETAILS[planId];
+  const displayName = userData?.display_name || user?.email?.split('@')[0] || 'User';
+  const userEmail = userData?.email || user?.email || '';
+
+  const handlePayment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsProcessing(true);
+
+    try {
+      // 1. Load Razorpay script
+      const loaded = await loadRazorpayScript();
+      if (!loaded) {
+        toast.error('Failed to load payment gateway. Please try again.');
+        setIsProcessing(false);
+        return;
+      }
+
+      // 2. Create Razorpay order via backend
+      const orderRes = await fetch('/api/razorpay/order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan: planId, userId: user?.id, email: userEmail }),
+      });
+
+      if (!orderRes.ok) {
+        const err = await orderRes.json();
+        toast.error(err.error || 'Could not create payment order.');
+        setIsProcessing(false);
+        return;
+      }
+
+      const { orderId, amount, currency, keyId } = await orderRes.json();
+
+      // 3. Open Razorpay checkout
+      const rzpOptions = {
+        key: keyId,
+        amount,
+        currency,
+        name: 'Pixen India Digital',
+        description: selectedPlan.name,
+        order_id: orderId,
+        prefill: {
+          name: displayName,
+          email: userEmail,
+        },
+        theme: { color: '#4F46E5' },
+        handler: async (response: { razorpay_payment_id: string; razorpay_order_id: string; razorpay_signature: string }) => {
+          // 4. Verify payment signature
+          const verifyRes = await fetch('/api/razorpay/verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(response),
+          });
+
+          const { verified } = await verifyRes.json();
+          if (!verified) {
+            toast.error('Payment verification failed. Please contact support.');
+            setIsProcessing(false);
+            return;
+          }
+
+          // 5. Update user plan in DB
+          if (user) {
+            await updateUserData(user.id, {
+              active_plan: selectedPlan.name,
+              plan_status: 'active',
+            });
+            await savePayment(user.id, selectedPlan.name, selectedPlan.amount, 'completed');
+            if (refreshUserData) await refreshUserData();
+          }
+
+          // 6. Send confirmation email
+          await fetch('/api/send-confirmation', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              to: userEmail,
+              name: displayName,
+              planName: selectedPlan.name,
+              planPrice: `${selectedPlan.price}/month`,
+              type: 'payment_confirmation',
+            }),
+          });
+
+          toast.success(`🎉 ${selectedPlan.name} activated! Check your email for next steps.`);
+          setIsProcessing(false);
+          setTimeout(() => router.push('/dashboard'), 1500);
+        },
+        modal: {
+          ondismiss: () => {
+            toast('Payment cancelled.', { icon: 'ℹ️' });
+            setIsProcessing(false);
+          },
+        },
+      };
+
+      const rzp = new window.Razorpay(rzpOptions);
+      rzp.open();
+    } catch (err: any) {
+      console.error('Payment error:', err);
+      toast.error('Something went wrong. Please try again or contact support.');
+      setIsProcessing(false);
+    }
+  };
 
   return (
     <>
       <Navbar />
       <main className="min-h-screen bg-gray-50 pt-24 pb-16">
         <Container size="lg">
+          {/* Breadcrumb */}
           <div className="mb-8 flex items-center gap-2 text-sm text-gray-500">
             <Link href="/" className="hover:text-primary-600 transition-colors">Home</Link>
             <span>/</span>
@@ -95,30 +230,25 @@ export default function PaymentPage() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            
-            {/* Left Column: Order Summary */}
+
+            {/* Left: Order Summary */}
             <div className="lg:col-span-5 order-2 lg:order-1 space-y-6">
               <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-200">
                 <Badge variant="primary" className="mb-4">Selected Plan</Badge>
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">{selectedPlan.name}</h2>
-                <p className="text-gray-600 mb-6">{selectedPlan.desc}</p>
-                
+                <p className="text-gray-500 text-sm mb-6">{selectedPlan.desc}</p>
+
                 <div className="flex items-end gap-2 mb-8">
                   <span className="text-4xl font-extrabold text-gray-900">{selectedPlan.price}</span>
                   <span className="text-gray-500 font-medium mb-1">/month</span>
                 </div>
 
                 <div className="space-y-4 pt-6 border-t border-gray-100">
-                  <h3 className="font-semibold text-gray-900">What's included in {selectedPlan.name}:</h3>
+                  <h3 className="font-semibold text-gray-900 text-sm">What&apos;s included:</h3>
                   <ul className="space-y-3">
-                    {[
-                      'Comprehensive Account Audit',
-                      'Custom Strategy Dashboard',
-                      'Dedicated Support Channel',
-                      'Performance Reporting'
-                    ].map((feature, i) => (
+                    {selectedPlan.features.map((feature, i) => (
                       <li key={i} className="flex items-start gap-3 text-sm text-gray-700">
-                        <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
                         {feature}
@@ -128,93 +258,78 @@ export default function PaymentPage() {
                 </div>
               </div>
 
-              {/* Trust badges */}
-              <div className="bg-white rounded-xl p-6 border border-gray-200 flex flex-col items-center justify-center text-center space-y-4">
-                <div className="flex -space-x-3">
-                  <div className="w-auto px-4 py-2 bg-gray-100 rounded-full font-bold text-gray-700 text-xs border border-white">SSL Secured</div>
-                  <div className="w-auto px-4 py-2 bg-blue-50 text-blue-700 rounded-full font-bold text-xs border border-white flex items-center gap-1">
-                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15l-4-4 1.41-1.41L11 14.17l6.59-6.59L19 9l-8 8z"/></svg>
-                    256-bit Encryption
-                  </div>
+              {/* Trust Badges */}
+              <div className="bg-white rounded-2xl p-6 border border-gray-200">
+                <div className="flex flex-wrap gap-2 justify-center mb-3">
+                  {['🔒 SSL Secured', '256-bit Encrypted', '30-Day Guarantee'].map(badge => (
+                    <span key={badge} className="text-xs font-semibold text-gray-600 bg-gray-100 px-3 py-1.5 rounded-full">{badge}</span>
+                  ))}
                 </div>
-                <p className="text-xs text-gray-500">
-                  Your payment information is strictly secured and never stored on our servers.
+                <p className="text-xs text-gray-500 text-center">
+                  Payments processed securely via Razorpay. Your data is never stored on our servers.
                 </p>
               </div>
+
+              <Link href="/pricing" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-primary-600 transition-colors">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                Change Plan
+              </Link>
             </div>
 
-            {/* Right Column: Checkout Form */}
+            {/* Right: Payment Form */}
             <div className="lg:col-span-7 order-1 lg:order-2">
-              <div className="bg-white rounded-3xl p-8 md:p-10 shadow-xl border border-gray-100 relative overflow-hidden">
-                <div className="absolute top-0 inset-x-0 h-2 bg-gradient-to-r from-primary-600 to-accent-500"></div>
-                
-                <div className="mb-8">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">Payment Details</h2>
-                  <p className="text-gray-500 text-sm">Fill out the information below to start your growth journey.</p>
-                </div>
+              <div className="bg-white rounded-3xl shadow-xl border border-gray-100 relative overflow-hidden">
+                {/* Top accent bar */}
+                <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-primary-600 to-accent-500"></div>
 
-                <form onSubmit={handlePayment} className="space-y-6">
-                  {/* Contact Info */}
-                  <div className="space-y-4">
-                    <h3 className="text-sm font-bold text-gray-900 uppercase tracking-widest border-b border-gray-100 pb-2">1. Contact Info</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs font-semibold text-gray-700 mb-1.5">First Name</label>
-                        <input type="text" readOnly value={formData.firstName} className="w-full px-4 py-3 bg-gray-100 border border-gray-200 text-gray-500 rounded-lg outline-none cursor-not-allowed" />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-gray-700 mb-1.5">Last Name</label>
-                        <input type="text" readOnly value={formData.lastName} className="w-full px-4 py-3 bg-gray-100 border border-gray-200 text-gray-500 rounded-lg outline-none cursor-not-allowed" />
-                      </div>
+                <div className="p-8 md:p-10">
+                  <div className="mb-8">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-1">Secure Checkout</h2>
+                    <p className="text-gray-500 text-sm">You&apos;re one step away from accelerating your growth</p>
+                  </div>
+
+                  {/* User info summary */}
+                  <div className="bg-primary-50 rounded-2xl p-5 mb-8 flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 to-primary-700 text-white flex items-center justify-center font-bold text-lg flex-shrink-0">
+                      {displayName.charAt(0).toUpperCase()}
                     </div>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-gray-900 truncate">{displayName}</p>
+                      <p className="text-sm text-gray-500 truncate">{userEmail}</p>
+                    </div>
+                    <span className="ml-auto bg-green-100 text-green-700 text-xs font-bold px-2.5 py-1 rounded-full flex-shrink-0">Verified ✓</span>
+                  </div>
+
+                  {/* Order summary line */}
+                  <div className="rounded-xl bg-gray-50 border border-gray-100 p-4 mb-8 flex items-center justify-between">
                     <div>
-                      <label className="block text-xs font-semibold text-gray-700 mb-1.5">Email Address</label>
-                      <input type="email" readOnly value={formData.email} className="w-full px-4 py-3 bg-gray-100 border border-gray-200 text-gray-500 rounded-lg outline-none cursor-not-allowed" />
+                      <p className="font-semibold text-gray-900">{selectedPlan.name}</p>
+                      <p className="text-xs text-gray-500 mt-0.5">Monthly subscription · Cancel anytime</p>
                     </div>
+                    <p className="text-xl font-extrabold text-gray-900">{selectedPlan.price}</p>
                   </div>
 
-                  {/* Payment Info (Mock Stripe UI) */}
-                  <div className="space-y-4 pt-4">
-                    <h3 className="text-sm font-bold text-gray-900 uppercase tracking-widest border-b border-gray-100 pb-2 flex items-center justify-between">
-                      2. Payment Method
-                      <div className="flex gap-1">
-                        <div className="w-8 h-5 bg-blue-600 rounded flex items-center justify-center text-[8px] text-white font-bold italic">VISA</div>
-                        <div className="w-8 h-5 bg-orange-500 rounded flex items-center justify-center text-[8px] text-white font-bold italic shadow-inner">MC</div>
-                      </div>
-                    </h3>
-                    
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-xs font-semibold text-gray-700 mb-1.5">Card Information</label>
-                        <div className="relative">
-                          <input type="text" required maxLength={19} className="w-full px-4 py-3 pl-10 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:bg-white transition-all outline-none font-mono text-sm" placeholder="4242 4242 4242 4242" />
-                          <svg className="w-5 h-5 text-gray-400 absolute left-3 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+                  <form onSubmit={handlePayment}>
+                    {/* What you get after payment */}
+                    <div className="space-y-3 mb-8">
+                      {[
+                        { icon: '⚡', text: 'Instant plan activation upon payment' },
+                        { icon: '📩', text: 'Confirmation email sent immediately' },
+                        { icon: '📞', text: 'Onboarding call scheduled within 24 hours' },
+                      ].map((item) => (
+                        <div key={item.text} className="flex items-center gap-3 text-sm text-gray-600">
+                          <span className="text-base">{item.icon}</span>
+                          {item.text}
                         </div>
-                      </div>
-                      
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-700 mb-1.5">Expiry Date</label>
-                          <input type="text" required maxLength={5} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:bg-white transition-all outline-none font-mono text-sm" placeholder="MM/YY" />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-700 mb-1.5">CVC</label>
-                          <input type="text" required maxLength={4} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:bg-white transition-all outline-none font-mono text-sm" placeholder="123" />
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <label className="block text-xs font-semibold text-gray-700 mb-1.5">Cardholder Name</label>
-                        <input type="text" required className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:bg-white transition-all outline-none uppercase text-sm" placeholder="JOHN DOE" />
-                      </div>
+                      ))}
                     </div>
-                  </div>
 
-                  <div className="pt-6">
-                    <button 
-                      type="submit" 
+                    <button
+                      type="submit"
                       disabled={isProcessing}
-                      className="w-full bg-gray-900 text-white font-bold text-lg py-4 px-6 rounded-xl hover:bg-primary-600 transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1 flex items-center justify-center gap-3 disabled:bg-gray-400 disabled:transform-none disabled:shadow-none"
+                      className="w-full bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white font-bold text-lg py-4 px-6 rounded-xl transition-all shadow-xl hover:shadow-2xl hover:-translate-y-0.5 flex items-center justify-center gap-3 disabled:opacity-60 disabled:transform-none disabled:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
                     >
                       {isProcessing ? (
                         <>
@@ -222,26 +337,28 @@ export default function PaymentPage() {
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                           </svg>
-                          Processing Securely...
+                          Opening Razorpay...
                         </>
                       ) : (
                         <>
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                           </svg>
-                          Pay ₹{selectedPlan.amount} & Start Growth
+                          Pay {selectedPlan.price} via Razorpay
                         </>
                       )}
                     </button>
-                    <p className="text-center text-xs text-gray-500 mt-4">
-                      By clicking this button, you agree to our Terms of Service and Privacy Policy.
-                    </p>
-                  </div>
-                </form>
 
+                    <p className="text-center text-xs text-gray-400 mt-4">
+                      By clicking, you agree to our{' '}
+                      <Link href="/terms-of-service" className="underline hover:text-gray-600">Terms of Service</Link>
+                      {' '}and{' '}
+                      <Link href="/privacy-policy" className="underline hover:text-gray-600">Privacy Policy</Link>.
+                    </p>
+                  </form>
+                </div>
               </div>
             </div>
-
           </div>
         </Container>
       </main>

@@ -48,33 +48,65 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let mounted = true;
+
     // Safety timeout: never stay stuck on loading for more than 5 seconds
-    const timeout = setTimeout(() => setLoading(false), 5000);
+    const timeout = setTimeout(() => {
+      if (mounted) setLoading(false);
+    }, 5000);
+
+    const initSession = async () => {
+      try {
+        const { data } = await supabase.auth.getSession();
+        if (data.session && mounted) {
+          setSession(data.session);
+          setUser(data.session.user);
+          const uData = await getUserData(data.session.user.id);
+          if (mounted) setUserData(uData as any);
+        }
+      } catch (e) {
+        console.error("Session initialize error", e);
+      } finally {
+        if (mounted) {
+          setLoading(false);
+          clearTimeout(timeout);
+        }
+      }
+    };
+    
+    initSession();
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event: any, session: Session | null) => {
+    } = supabase.auth.onAuthStateChange(async (event: any, session: Session | null) => {
+      if (!mounted) return;
+      
       setSession(session);
       setUser(session?.user ?? null);
 
-      if (session?.user) {
-        try {
-          const data = await getUserData(session.user.id);
-          setUserData(data as any);
-        } catch (error) {
-          console.error('Error fetching user data:', error);
-          setUserData(null);
-        }
-      } else {
+      if (event === 'SIGNED_OUT') {
         setUserData(null);
+        setSession(null);
+        setUser(null);
+        return;
       }
 
-      // Always clear loading once auth state is known
-      setLoading(false);
-      clearTimeout(timeout);
+      if (session?.user) {
+        try {
+          if (event === 'SIGNED_IN') await new Promise(r => setTimeout(r, 500));
+          const data = await getUserData(session.user.id);
+          if (mounted) setUserData(data as any);
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+          if (mounted) setUserData(null);
+        }
+      } else {
+        if (mounted) setUserData(null); // Fallback
+      }
     });
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
       clearTimeout(timeout);
     };

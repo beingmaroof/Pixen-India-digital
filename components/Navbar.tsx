@@ -7,10 +7,13 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import Button from './Button';
+import CalendlyEmbed from './CalendlyEmbed';
+import AvatarMenu from './AvatarMenu';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isCalendlyOpen, setIsCalendlyOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
@@ -25,6 +28,7 @@ export default function Navbar() {
     { href: '/services', label: 'Services' },
     { href: '/case-studies', label: 'Case Studies' },
     { href: '/pricing', label: 'Pricing' },
+    { href: '/blog', label: 'Blog' },
   ];
 
   useEffect(() => {
@@ -40,7 +44,7 @@ export default function Navbar() {
 
   return (
     <nav
-      className="fixed w-full top-0 z-50 transition-all duration-300 animate-slide-down border-b border-purple-100/60 overflow-hidden"
+      className="fixed w-full top-0 z-50 transition-all duration-300 animate-slide-down border-b border-purple-100/60"
       style={{
         backgroundImage: 'url(/banner.jpeg)',
         backgroundSize: 'cover',
@@ -92,27 +96,16 @@ export default function Navbar() {
             })}
 
             {isMounted && isAuthenticated ? (
-              <div className="flex items-center gap-4">
-                <Link href="/dashboard" className="relative group">
-                  <span className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
-                    Dashboard
-                  </span>
-                  <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-gradient-to-r from-primary-600 to-primary-400 transition-all duration-300 group-hover:w-full"></span>
-                </Link>
-                <Link href="/profile" className="relative group">
-                  <span className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
-                    Profile
-                  </span>
-                  <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-gradient-to-r from-primary-600 to-primary-400 transition-all duration-300 group-hover:w-full"></span>
-                </Link>
+              <div className="flex items-center gap-6">
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => router.push('/contact')}
+                  onClick={() => setIsCalendlyOpen(true)}
                   className="shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
                 >
                   Book Consultation
                 </Button>
+                <AvatarMenu />
               </div>
             ) : isMounted ? (
               <div className="flex items-center gap-3">
@@ -124,7 +117,7 @@ export default function Navbar() {
                 <Button
                   variant="primary"
                   size="sm"
-                  onClick={() => router.push('/contact')}
+                  onClick={() => setIsCalendlyOpen(true)}
                   className="shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
                 >
                   Book Consultation
@@ -135,7 +128,7 @@ export default function Navbar() {
                 <Button
                   variant="primary"
                   size="sm"
-                  onClick={() => router.push('/contact')}
+                  onClick={() => setIsCalendlyOpen(true)}
                   className="shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
                 >
                   Book Consultation
@@ -186,27 +179,17 @@ export default function Navbar() {
 
               {isMounted && isAuthenticated ? (
                 <>
-                  <Link
-                    href="/dashboard"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="text-white/90 hover:text-white font-medium py-3 px-4 rounded-lg hover:bg-white/10 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2"
-                  >
-                    Dashboard
-                  </Link>
-                  <Link
-                    href="/profile"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="text-white/90 hover:text-white font-medium py-3 px-4 rounded-lg hover:bg-white/10 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2"
-                  >
-                    Profile
-                  </Link>
+                  <div className="flex items-center gap-4 py-3 px-4">
+                    <AvatarMenu />
+                    <span className="text-white font-medium">My Account</span>
+                  </div>
                   <Button
                     variant="primary"
                     size="md"
                     fullWidth
                     onClick={() => {
                       setIsMobileMenuOpen(false);
-                      router.push('/contact');
+                      setIsCalendlyOpen(true);
                     }}
                     className="shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200"
                   >
@@ -228,7 +211,7 @@ export default function Navbar() {
                     fullWidth
                     onClick={() => {
                       setIsMobileMenuOpen(false);
-                      router.push('/contact');
+                      setIsCalendlyOpen(true);
                     }}
                     className="shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200"
                   >
@@ -240,6 +223,7 @@ export default function Navbar() {
           </div>
         )}
       </div>
+      <CalendlyEmbed isOpen={isCalendlyOpen} onClose={() => setIsCalendlyOpen(false)} />
     </nav>
   );
 }

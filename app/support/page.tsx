@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Navbar, Footer, Section, Container, Badge, Button } from '@/components';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 
 export default function SupportPage() {
   const [formData, setFormData] = useState({
@@ -33,6 +34,17 @@ export default function SupportPage() {
       });
 
       if (response.ok) {
+        // Fire confirmation email (non-blocking)
+        fetch('/api/send-confirmation', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            to: formData.email,
+            name: formData.name,
+            type: 'support_confirmation',
+          }),
+        }).catch(() => {});
+        toast.success('Message sent! We\'ll get back to you within 24 hours.');
         setStatus('success');
       } else {
         const data = await response.json();
