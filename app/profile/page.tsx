@@ -1,10 +1,11 @@
 "use client";
-"use client";
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Navbar, Footer } from "@/components";
+import { PremiumNavbar } from "@/components";
+import { Footer } from "@/components";
+import { DarkPageWrapper, FadeIn } from "@/components/DarkUI";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   logOut,
@@ -44,7 +45,6 @@ export default function ProfilePage() {
   const [payments, setPayments] = useState<any[]>([]);
   const [loadingPayments, setLoadingPayments] = useState(false);
 
-  // 🔥 FIX: Redirect only AFTER loading completes
   useEffect(() => {
     if (!loading && !isAuthenticated) {
       router.push("/login");
@@ -55,7 +55,6 @@ export default function ProfilePage() {
     if (userData?.display_name) {
       setEditName(userData.display_name);
     }
-    // Initialize other fields from userData when available
     if (userData) {
       setEditDob(userData.dob || "");
       setEditGender(userData.gender || "");
@@ -67,7 +66,6 @@ export default function ProfilePage() {
   }, [userData]);
 
   useEffect(() => {
-    // Load notification preferences from localStorage
     const prefs_str = localStorage.getItem("pixen_notification_prefs");
     if (prefs_str) {
       try {
@@ -98,7 +96,6 @@ export default function ProfilePage() {
       return;
     }
 
-    // Validate phone number if provided
     if (editPhone && !/^\+?[0-9]{10,15}$/.test(editPhone.replace(/\s|-/g, ''))) {
       setSaveMessage({ text: "Please enter a valid phone number.", type: "error" });
       return;
@@ -115,8 +112,6 @@ export default function ProfilePage() {
         return;
       }
 
-      console.log('Saving profile data...', { targetUid });
-
       const { error } = await updateUserData(targetUid, {
         display_name: editName.trim(),
         dob: editDob || null,
@@ -128,17 +123,10 @@ export default function ProfilePage() {
       });
 
       if (error) {
-        console.error('Update error:', error);
         setSaveMessage({ text: `Update failed: ${error.message}`, type: "error" });
       } else {
-        console.log('Profile updated successfully');
-        
-        // Refresh user data in the global context
         await refreshUserData();
-        
-        // Also update local state immediately
         const updatedData = await getUserData(targetUid);
-        console.log('Fetched updated data:', updatedData);
         
         if (updatedData) {
           setEditName(updatedData.display_name || "");
@@ -154,15 +142,12 @@ export default function ProfilePage() {
         setIsEditing(false);
       }
     } catch (err) {
-      console.error('Unexpected error during save:', err);
       setSaveMessage({ text: "An unexpected error occurred. Please try again.", type: "error" });
     } finally {
       setIsSaving(false);
     }
   };
 
-  // 🔥 FIX 1: ONLY check loading here
-  // If billing tab opens, fetch history
   useEffect(() => {
     if (activeTab === "billing" && user) {
       setLoadingPayments(true);
@@ -175,517 +160,515 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <>
-        <Navbar />
+      <DarkPageWrapper>
+        <PremiumNavbar />
         <main className="min-h-screen flex justify-center items-center">
-          <div className="animate-spin h-10 w-10 border-b-2 border-primary-600 rounded-full"></div>
+          <div className="animate-spin h-10 w-10 border-b-2 border-purple-500 rounded-full"></div>
         </main>
         <Footer />
-      </>
+      </DarkPageWrapper>
     );
   }
 
-  // 🔥 FIX 2: Separate auth check
   if (!isAuthenticated) {
     return (
-      <>
-        <Navbar />
+      <DarkPageWrapper>
+        <PremiumNavbar />
         <main className="min-h-screen flex justify-center items-center">
-          <p className="text-gray-600">Please login to access your profile.</p>
+          <p className="text-white/60">Please login to access your profile.</p>
         </main>
         <Footer />
-      </>
+      </DarkPageWrapper>
     );
   }
 
+  const navButtonClass = (tabId: string) => `block w-full text-left py-3 px-4 rounded-xl transition-all duration-300 ${activeTab === tabId ? "bg-purple-500/10 text-purple-400 font-semibold border border-purple-500/20" : "text-white/60 hover:text-white hover:bg-white/5 border border-transparent font-medium"}`;
+  const inputClass = "w-full bg-[#02030A] border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all placeholder:text-white/20 disabled:bg-white/5 disabled:text-white/40 disabled:cursor-not-allowed disabled:border-transparent";
+  const labelClass = "block text-sm font-semibold text-white/60 mb-2 uppercase tracking-wider";
+
   return (
-    <>
-      <Navbar />
+    <DarkPageWrapper>
+      <PremiumNavbar />
 
-      <main className="min-h-screen bg-gray-50 pt-24 pb-12">
-        <div className="container-custom max-w-5xl mx-auto">
-
-          {/* Sidebar */}
-          <div className="flex flex-col md:flex-row gap-8">
-
-            <div className="w-full md:w-1/4 bg-white rounded-xl p-6 shadow">
-              <div className="text-center mb-4">
-                <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center text-xl font-bold mx-auto">
-                  {user?.email?.charAt(0)}
-                </div>
-                <p className="mt-2 text-sm text-gray-500">{user?.email}</p>
-              </div>
-
-              <button onClick={() => setActiveTab("general")} className={`block w-full text-left py-2 px-3 rounded-lg transition-colors ${activeTab === "general" ? "bg-primary-100 text-primary-700 font-semibold" : "text-gray-700 hover:bg-gray-100"}`}>General Info</button>
-              <button onClick={() => setActiveTab("security")} className={`block w-full text-left py-2 px-3 rounded-lg transition-colors ${activeTab === "security" ? "bg-primary-100 text-primary-700 font-semibold" : "text-gray-700 hover:bg-gray-100"}`}>Security & Login</button>
-              <button onClick={() => setActiveTab("notifications")} className={`block w-full text-left py-2 px-3 rounded-lg transition-colors ${activeTab === "notifications" ? "bg-primary-100 text-primary-700 font-semibold" : "text-gray-700 hover:bg-gray-100"}`}>Notifications</button>
-              <button onClick={() => setActiveTab("billing")} className={`block w-full text-left py-2 px-3 rounded-lg transition-colors ${activeTab === "billing" ? "bg-primary-100 text-primary-700 font-semibold" : "text-gray-700 hover:bg-gray-100"}`}>Billing History</button>
-
-              <div className="pt-6 mt-4 border-t border-gray-100">
-                <button
-                  onClick={() => setShowLogoutModal(true)}
-                  className="w-full text-center py-2.5 px-4 rounded-xl font-semibold text-red-600 border border-red-200 hover:bg-red-50 hover:border-red-300 transition-all flex items-center justify-center gap-2"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                  </svg>
-                  Log Out
-                </button>
-              </div>
+      <main className="min-h-screen pt-32 pb-20 relative z-10">
+        <div className="container-custom max-w-6xl mx-auto">
+          
+          <FadeIn>
+            {/* Header section abstract glow */}
+            <div className="mb-12 relative">
+              <div className="absolute top-1/2 left-0 w-64 h-64 bg-purple-500/20 rounded-full blur-[100px] -translate-y-1/2 pointer-events-none" />
+              <h1 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight relative z-10">
+                Account <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">Settings</span>
+              </h1>
             </div>
 
-            {/* Content */}
-            <div className="w-full md:w-3/4 bg-white rounded-xl p-6 shadow">
-
-              {activeTab === "general" && (
-                <>
-                  <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-bold text-gray-900">General Information</h2>
-                    {!isEditing && (
-                      <button
-                        onClick={() => setIsEditing(true)}
-                        className="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium"
-                      >
-                        Edit Profile
-                      </button>
-                    )}
+            <div className="flex flex-col md:flex-row gap-8 lg:gap-12 relative z-10">
+              
+              {/* Sidebar */}
+              <div className="w-full md:w-1/3 lg:w-1/4">
+                <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-6 sticky top-32">
+                  <div className="text-center mb-8 pb-8 border-b border-white/10 relative">
+                    <div className="w-20 h-20 bg-gradient-to-br from-purple-500/20 to-blue-500/20 border border-white/20 rounded-full flex items-center justify-center text-2xl font-extrabold text-white mx-auto shadow-[0_0_30px_rgba(168,85,247,0.2)]">
+                      {user?.email?.charAt(0).toUpperCase()}
+                    </div>
+                    <p className="mt-4 text-sm font-medium text-white/60 break-all">{user?.email}</p>
+                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-[1px] bg-gradient-to-r from-transparent via-purple-500/50 to-transparent" />
                   </div>
 
-                  {saveMessage.text && (
-                    <div className={`mb-4 p-4 rounded-lg ${saveMessage.type === "success" ? "bg-green-100 border border-green-400 text-green-800" : "bg-red-100 border border-red-400 text-red-800"}`}>
-                      {saveMessage.text}
-                    </div>
-                  )}
+                  <nav className="space-y-2">
+                    <button onClick={() => setActiveTab("general")} className={navButtonClass("general")}>General Info</button>
+                    <button onClick={() => setActiveTab("security")} className={navButtonClass("security")}>Security & Login</button>
+                    <button onClick={() => setActiveTab("notifications")} className={navButtonClass("notifications")}>Notifications</button>
+                    <button onClick={() => setActiveTab("billing")} className={navButtonClass("billing")}>Billing History</button>
+                  </nav>
 
-                  <div className="space-y-4">
-                    {/* Row 1: Display Name & Email */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Display Name *</label>
-                        <input
-                          type="text"
-                          value={editName}
-                          onChange={(e) => setEditName(e.target.value)}
-                          disabled={!isEditing}
-                          className="w-full border border-gray-300 rounded-lg px-4 py-2 text-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-600"
-                          placeholder="Your name"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
-                        <input
-                          type="email"
-                          value={user?.email || ""}
-                          disabled
-                          className="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-100 text-gray-600 cursor-not-allowed"
-                        />
-                        <p className="mt-1 text-xs text-gray-500">Email cannot be changed</p>
-                      </div>
-                    </div>
-
-                    {/* Row 2: Date of Birth & Gender */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Date of Birth</label>
-                        <input
-                          type="date"
-                          value={editDob}
-                          onChange={(e) => setEditDob(e.target.value)}
-                          disabled={!isEditing}
-                          className="w-full border border-gray-300 rounded-lg px-4 py-2 text-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-600"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Gender</label>
-                        <select
-                          value={editGender}
-                          onChange={(e) => setEditGender(e.target.value)}
-                          disabled={!isEditing}
-                          className="w-full border border-gray-300 rounded-lg px-4 py-2 text-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-600"
-                        >
-                          <option value="">Select Gender</option>
-                          <option value="male">Male</option>
-                          <option value="female">Female</option>
-                          <option value="other">Other</option>
-                          <option value="prefer-not-to-say">Prefer not to say</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    {/* Row 3: Phone Number & Company Name */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
-                        <input
-                          type="tel"
-                          value={editPhone}
-                          onChange={(e) => setEditPhone(e.target.value)}
-                          disabled={!isEditing}
-                          className="w-full border border-gray-300 rounded-lg px-4 py-2 text-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-600"
-                          placeholder="+91 98765 43210"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Company Name</label>
-                        <input
-                          type="text"
-                          value={editCompany}
-                          onChange={(e) => setEditCompany(e.target.value)}
-                          disabled={!isEditing}
-                          className="w-full border border-gray-300 rounded-lg px-4 py-2 text-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-600"
-                          placeholder="Your company name"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Row 4: Job Title & Location */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Job Title</label>
-                        <select
-                          value={editJobTitle}
-                          onChange={(e) => setEditJobTitle(e.target.value)}
-                          disabled={!isEditing}
-                          className="w-full border border-gray-300 rounded-lg px-4 py-2 text-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-600"
-                        >
-                          <option value="">Select Job Title</option>
-                          <option value="founder">Founder</option>
-                          <option value="co-founder">Co-Founder</option>
-                          <option value="ceo">Chief Executive Officer (CEO)</option>
-                          <option value="cto">Chief Technology Officer (CTO)</option>
-                          <option value="cfo">Chief Financial Officer (CFO)</option>
-                          <option value="cmo">Chief Marketing Officer (CMO)</option>
-                          <option value="director">Director</option>
-                          <option value="manager">Manager</option>
-                          <option value="senior-manager">Senior Manager</option>
-                          <option value="team-lead">Team Lead</option>
-                          <option value="developer">Developer/Engineer</option>
-                          <option value="senior-developer">Senior Developer</option>
-                          <option value="full-stack-developer">Full Stack Developer</option>
-                          <option value="frontend-developer">Frontend Developer</option>
-                          <option value="backend-developer">Backend Developer</option>
-                          <option value="designer">Designer</option>
-                          <option value="ui-ux-designer">UI/UX Designer</option>
-                          <option value="graphic-designer">Graphic Designer</option>
-                          <option value="marketing-specialist">Marketing Specialist</option>
-                          <option value="digital-marketer">Digital Marketer</option>
-                          <option value="seo-specialist">SEO Specialist</option>
-                          <option value="content-writer">Content Writer</option>
-                          <option value="sales-executive">Sales Executive</option>
-                          <option value="business-development">Business Development</option>
-                          <option value="hr-manager">HR Manager</option>
-                          <option value="operations-manager">Operations Manager</option>
-                          <option value="project-manager">Project Manager</option>
-                          <option value="product-manager">Product Manager</option>
-                          <option value="consultant">Consultant</option>
-                          <option value="freelancer">Freelancer</option>
-                          <option value="intern">Intern</option>
-                          <option value="student">Student</option>
-                          <option value="other">Other</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Location/City</label>
-                        <input
-                          type="text"
-                          value={editLocation}
-                          onChange={(e) => setEditLocation(e.target.value)}
-                          disabled={!isEditing}
-                          className="w-full border border-gray-300 rounded-lg px-4 py-2 text-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-600"
-                          placeholder="City, Country"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Action Buttons */}
-                    {isEditing && (
-                      <div className="flex gap-3 pt-4">
-                        <button
-                          onClick={handleSaveProfile}
-                          disabled={isSaving}
-                          className="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-                        >
-                          {isSaving ? "Saving..." : "Save Changes"}
-                        </button>
-                        <button
-                          onClick={() => {
-                            setIsEditing(false);
-                            // Reset form to original values
-                            if (userData) {
-                              setEditName(userData.display_name || "");
-                              setEditDob(userData.dob || "");
-                              setEditGender(userData.gender || "");
-                              setEditPhone(userData.phone || "");
-                              setEditCompany(userData.company || "");
-                              setEditJobTitle(userData.job_title || "");
-                              setEditLocation(userData.location || "");
-                            }
-                          }}
-                          className="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300 transition-colors font-medium"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    )}
+                  <div className="pt-6 mt-6 border-t border-white/10">
+                    <button
+                      onClick={() => setShowLogoutModal(true)}
+                      className="w-full text-center py-3 px-4 rounded-xl font-bold text-red-400 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 hover:border-red-500/30 hover:shadow-[0_0_20px_rgba(239,68,68,0.15)] transition-all flex items-center justify-center gap-2"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                      </svg>
+                      Log Out
+                    </button>
                   </div>
-                </>
-              )}
+                </div>
+              </div>
 
-              {activeTab === "security" && (
-                <>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6">Security & Login</h2>
+              {/* Content area */}
+              <div className="w-full md:w-2/3 lg:w-3/4">
+                <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-md p-8 md:p-10 shadow-2xl relative overflow-hidden min-h-[600px]">
+                  <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/5 rounded-full blur-[120px] pointer-events-none" />
 
-                  <div className="space-y-6">
-                    {/* Change Password Section */}
-                    <div className="border border-gray-200 rounded-lg p-6">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-4">Change Password</h3>
-                      <div className="space-y-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">Current Password</label>
-                          <input
-                            type="password"
-                            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary-500"
-                            placeholder="Enter current password"
-                          />
+                  <div className="relative z-10">
+                    {/* ===== GENERAL TAB ===== */}
+                    {activeTab === "general" && (
+                      <div className="animate-fade-in">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 pb-6 border-b border-white/10 gap-4">
+                          <h2 className="text-2xl font-bold text-white tracking-tight">General Information</h2>
+                          {!isEditing && (
+                            <button
+                              onClick={() => setIsEditing(true)}
+                              className="px-6 py-2.5 rounded-xl bg-white/10 border border-white/20 text-white font-semibold hover:bg-white/20 transition-all text-sm"
+                            >
+                              Edit Profile
+                            </button>
+                          )}
                         </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">New Password</label>
-                          <input
-                            type="password"
-                            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary-500"
-                            placeholder="Enter new password"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">Confirm New Password</label>
-                          <input
-                            type="password"
-                            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary-500"
-                            placeholder="Confirm new password"
-                          />
-                        </div>
-                        <button className="mt-2 bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium">
-                          Update Password
-                        </button>
-                      </div>
-                    </div>
 
-                    {/* Active Sessions */}
-                    <div className="border border-gray-200 rounded-lg p-6">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-4">Active Sessions</h3>
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                          <div>
-                            <p className="font-medium text-gray-900">Current Session</p>
-                            <p className="text-sm text-gray-600">Last active: Just now</p>
+                        {saveMessage.text && (
+                          <div className={`mb-8 p-4 rounded-xl backdrop-blur-sm border ${saveMessage.type === "success" ? "bg-green-500/10 border-green-500/30 text-green-300" : "bg-red-500/10 border-red-500/30 text-red-300"}`}>
+                            {saveMessage.text}
                           </div>
-                          <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium">Active</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {activeTab === "notifications" && (
-                <>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6">Notification Preferences</h2>
-
-                  {notifMessage.text && (
-                    <div className={`mb-6 p-4 rounded-lg transform transition-all border ${notifMessage.type === "success" ? "bg-green-50 border-green-200 text-green-800" : "bg-red-50 border-red-200 text-red-800"}`}>
-                      <div className="flex items-center gap-2">
-                        {notifMessage.type === "success" && (
-                          <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M10 18a8 8 0 11-16 0 8 8 0 0116 0zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                          </svg>
                         )}
-                        <p className="font-semibold">{notifMessage.text}</p>
-                      </div>
-                    </div>
-                  )}
 
-                  <div className="space-y-6">
-                    {/* Email Notifications */}
-                    <div className="border border-gray-200 rounded-lg p-6">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-4">Email Notifications</h3>
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium text-gray-900">Marketing Emails</p>
-                            <p className="text-sm text-gray-600">Receive updates about new features and promotions</p>
+                        <div className="space-y-6">
+                          {/* Row 1 */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                              <label className={labelClass}>Display Name *</label>
+                              <input
+                                type="text"
+                                value={editName}
+                                onChange={(e) => setEditName(e.target.value)}
+                                disabled={!isEditing}
+                                className={inputClass}
+                                placeholder="E.g. John Doe"
+                              />
+                            </div>
+                            <div>
+                              <label className={labelClass}>Email Address</label>
+                              <input
+                                type="email"
+                                value={user?.email || ""}
+                                disabled
+                                className={inputClass}
+                              />
+                              <p className="mt-2 text-xs font-medium text-white/40 uppercase tracking-widest">Email cannot be changed</p>
+                            </div>
                           </div>
-                          <label className="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" className="sr-only peer" checked={marketingEmails} onChange={(e) => setMarketingEmails(e.target.checked)} />
-                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
-                          </label>
-                        </div>
 
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium text-gray-900">Product Updates</p>
-                            <p className="text-sm text-gray-600">Get notified about important product updates</p>
+                          {/* Row 2 */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                              <label className={labelClass}>Date of Birth</label>
+                              <input
+                                type="date"
+                                value={editDob}
+                                onChange={(e) => setEditDob(e.target.value)}
+                                disabled={!isEditing}
+                                className={inputClass}
+                              />
+                            </div>
+                            <div>
+                              <label className={labelClass}>Gender</label>
+                              <select
+                                value={editGender}
+                                onChange={(e) => setEditGender(e.target.value)}
+                                disabled={!isEditing}
+                                className={inputClass}
+                              >
+                                <option value="" className="bg-gray-900">Select Gender</option>
+                                <option value="male" className="bg-gray-900">Male</option>
+                                <option value="female" className="bg-gray-900">Female</option>
+                                <option value="other" className="bg-gray-900">Other</option>
+                                <option value="prefer-not-to-say" className="bg-gray-900">Prefer not to say</option>
+                              </select>
+                            </div>
                           </div>
-                          <label className="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" className="sr-only peer" checked={productUpdates} onChange={(e) => setProductUpdates(e.target.checked)} />
-                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
-                          </label>
-                        </div>
 
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium text-gray-900">Newsletter</p>
-                            <p className="text-sm text-gray-600">Monthly newsletter with tips and insights</p>
+                          {/* Row 3 */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                              <label className={labelClass}>Phone Number</label>
+                              <input
+                                type="tel"
+                                value={editPhone}
+                                onChange={(e) => setEditPhone(e.target.value)}
+                                disabled={!isEditing}
+                                className={inputClass}
+                                placeholder="+91 98765 43210"
+                              />
+                            </div>
+                            <div>
+                              <label className={labelClass}>Company Name</label>
+                              <input
+                                type="text"
+                                value={editCompany}
+                                onChange={(e) => setEditCompany(e.target.value)}
+                                disabled={!isEditing}
+                                className={inputClass}
+                                placeholder="Your company name"
+                              />
+                            </div>
                           </div>
-                          <label className="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" className="sr-only peer" checked={newsletter} onChange={(e) => setNewsletter(e.target.checked)} />
-                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
-                          </label>
+
+                          {/* Row 4 */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                              <label className={labelClass}>Job Title</label>
+                              <select
+                                value={editJobTitle}
+                                onChange={(e) => setEditJobTitle(e.target.value)}
+                                disabled={!isEditing}
+                                className={inputClass}
+                              >
+                                <option value="" className="bg-gray-900">Select Job Title</option>
+                                <option value="founder" className="bg-gray-900">Founder</option>
+                                <option value="co-founder" className="bg-gray-900">Co-Founder</option>
+                                <option value="ceo" className="bg-gray-900">C-Level Executive</option>
+                                <option value="director" className="bg-gray-900">Director</option>
+                                <option value="manager" className="bg-gray-900">Manager</option>
+                                <option value="developer" className="bg-gray-900">Developer/Engineer</option>
+                                <option value="designer" className="bg-gray-900">Designer</option>
+                                <option value="marketing" className="bg-gray-900">Marketing Professional</option>
+                                <option value="sales" className="bg-gray-900">Sales Professional</option>
+                                <option value="freelancer" className="bg-gray-900">Freelancer</option>
+                                <option value="student" className="bg-gray-900">Student</option>
+                                <option value="other" className="bg-gray-900">Other</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label className={labelClass}>Location/City</label>
+                              <input
+                                type="text"
+                                value={editLocation}
+                                onChange={(e) => setEditLocation(e.target.value)}
+                                disabled={!isEditing}
+                                className={inputClass}
+                                placeholder="City, Country"
+                              />
+                            </div>
+                          </div>
+
+                          {/* Actions */}
+                          {isEditing && (
+                            <div className="flex gap-4 pt-8 border-t border-white/10 mt-8">
+                              <button
+                                onClick={handleSaveProfile}
+                                disabled={isSaving}
+                                className="bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold px-8 py-3 rounded-xl hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] transition-all disabled:opacity-50"
+                              >
+                                {isSaving ? "Saving..." : "Save Changes"}
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setIsEditing(false);
+                                  if (userData) {
+                                    setEditName(userData.display_name || "");
+                                    setEditDob(userData.dob || "");
+                                    setEditGender(userData.gender || "");
+                                    setEditPhone(userData.phone || "");
+                                    setEditCompany(userData.company || "");
+                                    setEditJobTitle(userData.job_title || "");
+                                    setEditLocation(userData.location || "");
+                                  }
+                                }}
+                                className="bg-white/5 border border-white/10 text-white px-8 py-3 rounded-xl hover:bg-white/10 transition-colors font-bold"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          )}
                         </div>
                       </div>
-                    </div>
+                    )}
 
-                    {/* Save Preferences */}
-                    <div className="pt-4">
-                      <button onClick={handleSaveNotifications} className="bg-primary-600 text-white px-6 py-2.5 rounded-lg hover:bg-primary-700 transition-colors shadow-lg hover:shadow-xl font-bold">
-                        Save Preferences
-                      </button>
-                    </div>
-                  </div>
-                </>
-              )}
+                    {/* ===== SECURITY TAB ===== */}
+                    {activeTab === "security" && (
+                      <div className="animate-fade-in">
+                        <h2 className="text-2xl font-bold text-white tracking-tight mb-8 pb-6 border-b border-white/10">Security & Login</h2>
 
-              {activeTab === "billing" && (
-                <>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6">Billing History</h2>
-
-                  <div className="space-y-6">
-                    {/* Current Plan */}
-                    <div className="border border-gray-200 rounded-lg p-6 bg-gradient-to-r from-primary-50 to-primary-100">
-                      <div className="flex items-center justify-between mb-4">
-                        <div>
-                          <h3 className="text-lg font-semibold text-gray-900">Current Plan</h3>
-                          <p className="text-gray-600 mt-1">Your current subscription plan</p>
-                        </div>
-                        <span className={`px-4 py-2 rounded-full text-sm font-semibold ${userData?.plan_status === 'active' ? 'bg-primary-600 text-white' : 'bg-gray-200 text-gray-700'}`}>
-                          {userData?.plan_status === 'active' ? 'Active' : 'Free'}
-                        </span>
-                      </div>
-                      <div className="flex items-end justify-between">
-                        <div>
-                          <p className="text-3xl font-bold text-gray-900">{userData?.active_plan || 'Free Plan'}</p>
-                          <p className="text-sm text-gray-600 mt-1">
-                            {userData?.active_plan ? 'Renews automatically' : 'No active paid subscriptions'}
-                          </p>
-                        </div>
-                        <Link href="/pricing" className="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors font-medium inline-block text-center shadow-md">
-                          {userData?.active_plan ? 'Change Plan' : 'Upgrade Plan'}
-                        </Link>
-                      </div>
-                    </div>
-
-                    {/* Billing History Table */}
-                    <div className="border border-gray-200 rounded-lg overflow-hidden">
-                      <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
-                        <h3 className="text-lg font-semibold text-gray-900">Payment History</h3>
-                      </div>
-                      <div className="divide-y divide-gray-200">
-                        {loadingPayments ? (
-                          <div className="p-6 text-center text-gray-500">
-                            <svg className="animate-spin mx-auto h-8 w-8 text-primary-600 mb-2" fill="none" viewBox="0 0 24 24">
-                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                            </svg>
-                            <p className="font-medium">Loading history...</p>
-                          </div>
-                        ) : payments.length === 0 ? (
-                          <div className="p-6 text-center text-gray-500">
-                            <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            <p className="mt-2 font-medium">No billing history</p>
-                            <p className="text-sm mt-1">When you make purchases, they&apos;ll appear here</p>
-                          </div>
-                        ) : (
-                          payments.map((payment) => (
-                            <div key={payment.id} className="p-6 flex items-center justify-between">
+                        <div className="space-y-8">
+                          {/* Change Password */}
+                          <div className="border border-white/10 bg-white/5 rounded-2xl p-8 relative overflow-hidden group">
+                            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-purple-500/0 to-purple-500/0 group-hover:from-purple-500/5 group-hover:to-blue-500/5 transition-all duration-500 pointer-events-none" />
+                            <h3 className="text-xl font-bold text-white mb-6">Change Password</h3>
+                            <div className="space-y-5 relative z-10">
                               <div>
-                                <p className="font-bold text-gray-900">{payment.plan_name}</p>
-                                <p className="text-sm text-gray-500">
-                                  {new Date(payment.created_at).toLocaleDateString()}
-                                </p>
+                                <label className={labelClass}>Current Password</label>
+                                <input type="password" className={inputClass} placeholder="••••••••" />
                               </div>
-                              <div className="text-right">
-                                <p className="font-semibold text-gray-900 text-lg">₹{payment.amount}</p>
-                                <span className={`text-xs px-3 py-1 mt-1 rounded-full font-bold inline-block ${payment.status?.toLowerCase() === 'completed' || payment.status?.toLowerCase() === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                                  {payment.status}
+                              <div>
+                                <label className={labelClass}>New Password</label>
+                                <input type="password" className={inputClass} placeholder="••••••••" />
+                              </div>
+                              <div>
+                                <label className={labelClass}>Confirm New Password</label>
+                                <input type="password" className={inputClass} placeholder="••••••••" />
+                              </div>
+                              <button className="mt-4 bg-white/10 border border-white/20 text-white font-bold px-8 py-3 rounded-xl hover:bg-purple-600 hover:border-transparent hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] transition-all">
+                                Update Password
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Active Sessions */}
+                          <div className="border border-white/10 bg-white/5 rounded-2xl p-8">
+                            <h3 className="text-xl font-bold text-white mb-6">Active Sessions</h3>
+                            <div className="flex items-center justify-between p-4 bg-[#02030A] border border-white/10 rounded-xl">
+                              <div className="flex items-center gap-4">
+                                <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center border border-green-500/30 text-green-400">
+                                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                                </div>
+                                <div>
+                                  <p className="font-bold text-white">Current Session</p>
+                                  <p className="text-sm text-white/40">Mac OS • Chrome • Just now</p>
+                                </div>
+                              </div>
+                              <span className="text-xs tracking-wider uppercase bg-green-500/20 text-green-400 px-3 py-1 rounded-full font-bold border border-green-500/30">Active</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* ===== NOTIFICATIONS TAB ===== */}
+                    {activeTab === "notifications" && (
+                      <div className="animate-fade-in">
+                        <h2 className="text-2xl font-bold text-white tracking-tight mb-8 pb-6 border-b border-white/10">Notification Preferences</h2>
+
+                        {notifMessage.text && (
+                          <div className={`mb-8 p-4 rounded-xl backdrop-blur-sm border ${notifMessage.type === "success" ? "bg-green-500/10 border-green-500/30 text-green-300" : "bg-red-500/10 border-red-500/30 text-red-300"}`}>
+                            {notifMessage.text}
+                          </div>
+                        )}
+
+                        <div className="border border-white/10 bg-white/5 rounded-2xl p-8">
+                          <h3 className="text-xl font-bold text-white mb-6">Email Notifications</h3>
+                          <div className="space-y-6">
+                            
+                            <div className="flex items-center justify-between p-4 rounded-xl hover:bg-white/5 transition-colors">
+                              <div>
+                                <p className="font-bold text-white text-lg">Marketing Emails</p>
+                                <p className="text-sm text-white/50 mt-1">Receive updates about new features and promotions</p>
+                              </div>
+                              <label className="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" className="sr-only peer" checked={marketingEmails} onChange={(e) => setMarketingEmails(e.target.checked)} />
+                                <div className="w-14 h-7 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-purple-600"></div>
+                              </label>
+                            </div>
+
+                            <div className="w-full h-[1px] bg-white/10"></div>
+
+                            <div className="flex items-center justify-between p-4 rounded-xl hover:bg-white/5 transition-colors">
+                              <div>
+                                <p className="font-bold text-white text-lg">Product Updates</p>
+                                <p className="text-sm text-white/50 mt-1">Get notified about important product updates</p>
+                              </div>
+                              <label className="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" className="sr-only peer" checked={productUpdates} onChange={(e) => setProductUpdates(e.target.checked)} />
+                                <div className="w-14 h-7 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-purple-600"></div>
+                              </label>
+                            </div>
+
+                            <div className="w-full h-[1px] bg-white/10"></div>
+
+                            <div className="flex items-center justify-between p-4 rounded-xl hover:bg-white/5 transition-colors">
+                              <div>
+                                <p className="font-bold text-white text-lg">Newsletter</p>
+                                <p className="text-sm text-white/50 mt-1">Monthly newsletter with tips and insights</p>
+                              </div>
+                              <label className="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" className="sr-only peer" checked={newsletter} onChange={(e) => setNewsletter(e.target.checked)} />
+                                <div className="w-14 h-7 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-purple-600"></div>
+                              </label>
+                            </div>
+
+                          </div>
+                          
+                          <div className="pt-8 mt-4 border-t border-white/10">
+                            <button onClick={handleSaveNotifications} className="bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold px-8 py-3 rounded-xl hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] transition-all">
+                              Save Preferences
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* ===== BILLING TAB ===== */}
+                    {activeTab === "billing" && (
+                      <div className="animate-fade-in">
+                        <h2 className="text-2xl font-bold text-white tracking-tight mb-8 pb-6 border-b border-white/10">Billing History</h2>
+
+                        <div className="space-y-8">
+                          {/* Current Plan */}
+                          <div className="rounded-2xl border border-purple-500/30 bg-gradient-to-br from-purple-900/40 to-[#02030A] p-8 relative overflow-hidden group">
+                            <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/20 rounded-full blur-[80px] -mr-32 -mt-32 transition-transform duration-700 group-hover:scale-150" />
+                            
+                            <div className="relative z-10">
+                              <div className="flex items-center justify-between mb-6">
+                                <div>
+                                  <h3 className="text-xl font-bold text-white">Current Plan</h3>
+                                  <p className="text-white/60 mt-1 text-sm">Your subscription status</p>
+                                </div>
+                                <span className={`px-4 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase border ${userData?.plan_status === 'active' ? 'bg-purple-500/20 text-purple-300 border-purple-500/30' : 'bg-white/10 text-white/70 border-white/20'}`}>
+                                  {userData?.plan_status === 'active' ? 'Active' : 'Free Tier'}
                                 </span>
                               </div>
-                            </div>
-                          ))
-                        )}
-                      </div>
-                    </div>
 
-                    {/* Payment Methods */}
-                    <div className="border border-gray-200 rounded-lg p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-semibold text-gray-900">Payment Methods</h3>
-                        <Link href="/payment" className="text-primary-600 hover:text-primary-700 font-medium text-sm">Add Payment Method</Link>
+                              <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
+                                <div>
+                                  <p className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-white/70">{userData?.active_plan || 'Free Plan'}</p>
+                                  <p className="text-sm text-purple-300/60 mt-2 font-medium">
+                                    {userData?.active_plan ? 'Renews automatically' : 'No active paid subscriptions'}
+                                  </p>
+                                </div>
+                                <Link href="/pricing" className="bg-white text-gray-950 px-8 py-3 rounded-xl hover:bg-white/90 transition-colors font-bold text-center whitespace-nowrap shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)]">
+                                  {userData?.active_plan ? 'Change Plan' : 'View Premium Plans'}
+                                </Link>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Billing History Table */}
+                          <div className="border border-white/10 bg-white/5 rounded-2xl overflow-hidden">
+                            <div className="bg-[#02030A]/50 px-8 py-5 border-b border-white/10">
+                              <h3 className="text-lg font-bold text-white">Payment History</h3>
+                            </div>
+                            
+                            <div className="divide-y divide-white/5">
+                              {loadingPayments ? (
+                                <div className="p-12 text-center text-white/50">
+                                  <svg className="animate-spin mx-auto h-8 w-8 text-purple-500 mb-4" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                  </svg>
+                                  <p className="font-semibold tracking-wide">Loading records...</p>
+                                </div>
+                              ) : payments.length === 0 ? (
+                                <div className="p-12 text-center text-white/40">
+                                  <div className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-4">
+                                    <svg className="h-8 w-8 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                  </div>
+                                  <p className="text-lg font-bold text-white/70 mb-1">No transaction history</p>
+                                  <p className="text-sm">Invoices will appear here once you make a purchase.</p>
+                                </div>
+                              ) : (
+                                payments.map((payment) => (
+                                  <div key={payment.id} className="p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-white/[0.02] transition-colors">
+                                    <div>
+                                      <p className="font-bold text-white text-lg">{payment.plan_name}</p>
+                                      <p className="text-sm font-medium text-white/40 mt-1 uppercase tracking-wider">
+                                        {new Date(payment.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
+                                      </p>
+                                    </div>
+                                    <div className="md:text-right flex md:flex-col items-center md:items-end justify-between">
+                                      <p className="font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400 text-xl tracking-tight">₹{payment.amount}</p>
+                                      <span className={`text-xs px-3 py-1 mt-1 rounded-full font-bold uppercase tracking-wider border ${payment.status?.toLowerCase() === 'completed' || payment.status?.toLowerCase() === 'active' ? 'bg-green-500/20 text-green-400 border-green-500/30' : 'bg-white/10 text-white/70 border-white/20'}`}>
+                                        {payment.status}
+                                      </span>
+                                    </div>
+                                  </div>
+                                ))
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Payment Methods */}
+                          <div className="border border-white/10 bg-white/5 rounded-2xl p-8">
+                            <div className="flex items-center justify-between mb-6">
+                              <h3 className="text-xl font-bold text-white">Payment Methods</h3>
+                              <Link href="/payment" className="text-purple-400 hover:text-purple-300 font-bold text-sm tracking-wide transition-colors">Add New +</Link>
+                            </div>
+                            <div className="text-center py-10 text-white/40 border border-dashed border-white/10 rounded-xl">
+                              <p className="font-medium">No saved payment methods</p>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                      <div className="text-center py-8 text-gray-500">
-                        <p>No payment methods saved</p>
-                      </div>
-                    </div>
+                    )}
+
                   </div>
-                </>
-              )}
+                </div>
+              </div>
 
             </div>
-
-          </div>
+          </FadeIn>
         </div>
       </main>
 
-      {/* Logout Confirmation Modal */}
+      {/* Logout Confirmation Modal - Dark Theme */}
       {showLogoutModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 animate-scale-in relative border border-gray-100">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-white shadow-sm">
-              <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+          <div className="bg-[#050815] border border-white/10 rounded-3xl shadow-[0_0_50px_rgba(0,0,0,0.8)] max-w-sm w-full p-8 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/20 rounded-full blur-[50px] pointer-events-none" />
+            
+            <div className="w-16 h-16 bg-red-500/10 border border-red-500/20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_20px_rgba(239,68,68,0.2)]">
+              <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
               </svg>
             </div>
             
-            <h3 className="text-xl font-bold text-gray-900 text-center mb-2">Log out of your account?</h3>
-            <p className="text-gray-500 text-center mb-8 text-sm px-4">
-              You will need to sign back in to access your profile and settings.
+            <h3 className="text-2xl font-bold text-white text-center mb-3">Log Out?</h3>
+            <p className="text-white/50 text-center mb-8 text-sm leading-relaxed px-2">
+              You will securely log out of your session. You can sign back in anytime.
             </p>
             
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-3 relative z-10">
               <button
                 onClick={handleLogout}
                 disabled={isLoggingOut}
-                className="w-full flex items-center justify-center py-3 px-4 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition-all shadow-md hover:shadow-lg disabled:bg-red-400"
+                className="w-full py-3.5 px-4 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl transition-all shadow-[0_0_15px_rgba(239,68,68,0.3)] disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {isLoggingOut ? (
                   <>
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                    <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                     </svg>
-                    Logging out...
+                    Disconnecting...
                   </>
-                ) : 'Sign Out'}
+                ) : 'Confirm Logout'}
               </button>
               
               <button
                 onClick={() => setShowLogoutModal(false)}
                 disabled={isLoggingOut}
-                className="w-full py-3 px-4 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 font-semibold rounded-xl transition-all disabled:opacity-50"
+                className="w-full py-3.5 px-4 bg-white/5 border border-white/10 text-white hover:bg-white/10 font-bold rounded-xl transition-all disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -695,6 +678,6 @@ export default function ProfilePage() {
       )}
 
       <Footer />
-    </>
+    </DarkPageWrapper>
   );
 }

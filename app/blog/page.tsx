@@ -1,6 +1,8 @@
 import React from 'react';
 import Link from 'next/link';
-import { Navbar, Footer } from '@/components';
+import PremiumNavbar from '@/components/PremiumNavbar';
+import { Footer } from '@/components';
+import { DarkPageWrapper, DarkHero, DarkSection, FadeIn } from '@/components/DarkUI';
 
 export const metadata = {
   title: 'Blog - Pixen India Digital | Digital Growth Insights',
@@ -42,65 +44,67 @@ const blogPosts = [
 
 export default function BlogPage() {
   return (
-    <>
-      <Navbar />
-      <div className="min-h-screen bg-gray-50 pt-32 pb-20">
-      <div className="container-custom">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-6">
-            Digital Growth Insights
-          </h1>
-          <p className="text-xl text-gray-600">
-            Expert strategies, tactical guides, and industry trends to help you scale your revenue and build unshakeable brand authority.
-          </p>
-        </div>
+    <DarkPageWrapper>
+      <PremiumNavbar />
+      <DarkHero
+        eyebrow="Insights & Strategies"
+        title="Digital Growth"
+        gradientTitle="Insights"
+        subtitle="Expert strategies, tactical guides, and industry trends to help you scale your revenue and build unshakeable brand authority."
+      />
 
+      <DarkSection>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {blogPosts.map((post) => (
+          {blogPosts.map((post, i) => (
             <Link href={`/blog/${post.slug}`} key={post.id} className="group block h-full">
-              <article className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 h-full flex flex-col transform hover:-translate-y-1">
-                <div className="h-48 bg-gradient-to-br from-primary-100 to-purple-50 p-6 flex items-end relative overflow-hidden">
-                  {/* Abstract background elements */}
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-primary-200/50 rounded-full blur-3xl -mr-16 -mt-16 transition-transform duration-500 group-hover:scale-150"></div>
-                  <div className="absolute bottom-0 left-0 w-24 h-24 bg-purple-200/50 rounded-full blur-2xl -ml-12 -mb-12 transition-transform duration-500 group-hover:scale-150"></div>
+              <FadeIn delay={i * 0.1} className="h-full">
+                <article className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm overflow-hidden hover:border-purple-500/50 hover:shadow-[0_0_30px_rgba(168,85,247,0.15)] transition-all duration-300 h-full flex flex-col transform group-hover:-translate-y-1">
                   
-                  <span className="inline-block px-4 py-1.5 bg-white/90 backdrop-blur-sm text-primary-700 text-xs font-bold tracking-wider uppercase rounded-full shadow-sm z-10 relative">
-                    {post.category}
-                  </span>
-                </div>
-                
-                <div className="p-8 flex flex-col flex-grow">
-                  <div className="flex items-center text-sm font-medium text-gray-500 mb-4 space-x-4">
-                    <span>{post.date}</span>
-                    <span className="w-1.5 h-1.5 rounded-full bg-gray-300"></span>
-                    <span>{post.readTime}</span>
-                  </div>
-                  
-                  <h2 className="text-xl font-bold text-gray-900 mb-4 group-hover:text-primary-600 transition-colors line-clamp-2">
-                    {post.title}
-                  </h2>
-                  
-                  <p className="text-gray-600 mb-6 leading-relaxed flex-grow line-clamp-3">
-                    {post.excerpt}
-                  </p>
-                  
-                  <div className="mt-auto flex items-center justify-between pt-6 border-t border-gray-50">
-                    <span className="text-sm font-semibold text-gray-900">{post.author}</span>
-                    <span className="text-primary-600 font-medium text-sm flex items-center group-hover:underline">
-                      Read Article
-                      <svg className="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                      </svg>
+                  {/* Image/Abstract Header */}
+                  <div className="h-48 bg-white/5 p-6 flex items-end relative overflow-hidden border-b border-white/10">
+                    <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-blue-500/10 pointer-events-none" />
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/20 rounded-full blur-[40px] -mr-16 -mt-16 transition-transform duration-700 group-hover:scale-150" />
+                    <div className="absolute bottom-0 left-0 w-24 h-24 bg-blue-500/20 rounded-full blur-[40px] -ml-12 -mb-12 transition-transform duration-700 group-hover:scale-150" />
+                    
+                    <span className="inline-block px-3 py-1 bg-white/10 backdrop-blur-md border border-white/20 text-white/90 text-xs font-bold tracking-wider uppercase rounded-full shadow-sm z-10 relative">
+                      {post.category}
                     </span>
                   </div>
-                </div>
-              </article>
+                  
+                  {/* Content */}
+                  <div className="p-8 flex flex-col flex-grow">
+                    <div className="flex items-center text-xs font-semibold text-white/40 uppercase tracking-widest mb-4 space-x-3">
+                      <span>{post.date}</span>
+                      <span className="w-1 h-1 rounded-full bg-white/30" />
+                      <span>{post.readTime}</span>
+                    </div>
+                    
+                    <h2 className="text-xl font-bold text-white mb-4 group-hover:text-purple-300 transition-colors line-clamp-2 leading-snug">
+                      {post.title}
+                    </h2>
+                    
+                    <p className="text-white/50 mb-6 leading-relaxed flex-grow line-clamp-3 text-sm">
+                      {post.excerpt}
+                    </p>
+                    
+                    {/* Footer */}
+                    <div className="mt-auto pt-6 border-t border-white/10 flex items-center justify-between">
+                      <span className="text-sm font-semibold text-white/80">{post.author}</span>
+                      <span className="text-purple-400 font-semibold text-sm flex items-center group-hover:text-purple-300">
+                        Read Article
+                        <svg className="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                      </span>
+                    </div>
+                  </div>
+                </article>
+              </FadeIn>
             </Link>
           ))}
         </div>
-      </div>
-    </div>
-    <Footer />
-    </>
+      </DarkSection>
+      <Footer />
+    </DarkPageWrapper>
   );
 }
