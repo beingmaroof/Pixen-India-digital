@@ -50,7 +50,7 @@ function getEmailContent(type: EmailBody['type'], name: string, planName?: strin
           </div>
 
           <div style="background: #f9fafb; padding: 24px 32px; border-radius: 0 0 16px 16px; text-align: center; border-top: 1px solid #e5e7eb;">
-            <p style="color: #9ca3af; font-size: 12px; margin: 0;">© 2025 Pixen India Digital · B/459, Gali no.6, Khadda Colony, Jaitpur, South Delhi 110044</p>
+            <p style="color: #9ca3af; font-size: 12px; margin: 0;">© 2025 Pixen India Digital · B/459, Street no. 6, Khadda Colony, Jaitpur, South Delhi 110044</p>
           </div>
         </div>
       `,

@@ -85,7 +85,7 @@ const organizationSchema = {
   },
   address: {
     "@type": "PostalAddress",
-    streetAddress: "B/459, Gali no.6, Khadda Colony, Jaitpur",
+    streetAddress: "B/459, Street no. 6, Khadda Colony, Jaitpur",
     addressLocality: "South Delhi",
     addressRegion: "Delhi",
     postalCode: "110044",

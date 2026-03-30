@@ -115,7 +115,7 @@ export default function Footer() {
               </li>
               <li className="flex items-start gap-3">
                 <svg className="w-5 h-5 text-purple-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                <span className="text-white/40 leading-relaxed">B/459, Gali no.6, Khadda Colony, Jaitpur, South Delhi 110044</span>
+                <span className="text-white/40 leading-relaxed">B/459, Street no. 6, Khadda Colony, Jaitpur, South Delhi 110044</span>
               </li>
               <li className="pt-2">
                 <Link href="/contact" className="inline-flex items-center text-purple-400 hover:text-purple-300 text-sm font-semibold transition-colors">
