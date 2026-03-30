@@ -437,19 +437,7 @@ html {
   90% { transform: translate(-1%, 2%); }
 }
 
-.cinematic-grain::after {
-  content: '';
-  position: fixed;
-  inset: -30%;
-  width: 160%;
-  height: 160%;
-  pointer-events: none;
-  opacity: 0.028;
-  z-index: 9999;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: 256px 256px;
-  animation: grainShift 0.15s steps(1) infinite;
-}
+
 
 /* ─── Hero stat ticker ───────────────────────────────────────────────────── */
 @keyframes tickerScroll {

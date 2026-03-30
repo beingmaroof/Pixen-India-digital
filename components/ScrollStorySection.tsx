@@ -201,12 +201,13 @@ function StageOverlay({
 
   if (!isVisible) return null;
 
+  // On mobile always center; left/right only on md+
   const positionClass =
     stage.position === 'left'
-      ? 'items-start text-left pl-8 md:pl-16 lg:pl-20'
+      ? 'items-center text-center px-5 md:items-start md:text-left md:pl-16 lg:pl-20 md:px-0'
       : stage.position === 'right'
-      ? 'items-end text-right pr-8 md:pr-16 lg:pr-20'
-      : 'items-center text-center';
+      ? 'items-center text-center px-5 md:items-end md:text-right md:pr-16 lg:pr-20 md:px-0'
+      : 'items-center text-center px-5';
 
   const accentHex = stage.accentColor;
 
@@ -216,39 +217,22 @@ function StageOverlay({
       style={{ opacity, transform: `translateY(${translateY}px)`, transition: 'none' }}
     >
 
-
       {/* Text block */}
-      <div className={`max-w-xl ${stage.position === 'center' ? 'mx-auto' : ''} relative z-10`}>
+      <div className={`w-full max-w-xs sm:max-w-sm md:max-w-lg ${stage.position === 'center' ? 'mx-auto' : 'md:mx-0 mx-auto'} relative z-10`}>
         {/* Eyebrow */}
-        <div
-          className="flex items-center gap-2.5 mb-5"
-          style={{
-            justifyContent:
-              stage.position === 'center'
-                ? 'center'
-                : stage.position === 'right'
-                ? 'flex-end'
-                : 'flex-start',
-          }}
-        >
+        <div className="flex items-center justify-center md:justify-start gap-2.5 mb-3 md:mb-5">
+          <span className="w-5 h-px" style={{ background: accentHex }} />
           <span
-            className="w-6 h-px"
-            style={{ background: accentHex }}
-          />
-          <span
-            className="text-[10px] font-bold tracking-[0.3em] uppercase"
+            className="text-[9px] sm:text-[10px] font-bold tracking-[0.25em] uppercase"
             style={{ color: accentHex }}
           >
             {stage.eyebrow}
           </span>
-          <span
-            className="w-6 h-px"
-            style={{ background: accentHex }}
-          />
+          <span className="w-5 h-px" style={{ background: accentHex }} />
         </div>
 
         {/* Heading — line by line gradient */}
-        <h2 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold leading-[1.05] tracking-tight mb-5">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold leading-[1.05] tracking-tight mb-3 md:mb-5">
           {stage.heading.map((line, i) => (
             <span
               key={i}
@@ -271,14 +255,14 @@ function StageOverlay({
 
         {/* Subheading */}
         {stage.subheading && (
-          <p className="text-lg lg:text-xl font-medium text-white/65 mb-4 leading-snug">
+          <p className="text-sm sm:text-base lg:text-lg font-medium text-white/65 mb-3 leading-snug">
             {stage.subheading}
           </p>
         )}
 
         {/* Body */}
         {stage.body && (
-          <p className="text-sm lg:text-base text-white/45 leading-relaxed max-w-sm">
+          <p className="text-xs sm:text-sm lg:text-base text-white/45 leading-relaxed">
             {stage.body}
           </p>
         )}
@@ -297,23 +281,23 @@ function StageOverlay({
 
         {/* Final CTAs */}
         {'isFinal' in stage && stage.isFinal && (
-          <div className="flex flex-col sm:flex-row gap-4 mt-10 pointer-events-auto justify-center">
+          <div className="flex flex-col sm:flex-row gap-3 mt-6 md:mt-10 pointer-events-auto justify-center">
             <button
               onClick={onAuditClick}
-              className="group relative px-8 py-4 rounded-full font-bold text-white overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/40 hover:-translate-y-1 text-base"
+              className="group relative px-5 sm:px-7 md:px-8 py-3 md:py-4 rounded-full font-bold text-white overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/40 hover:-translate-y-1 text-sm md:text-base"
             >
               <span className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-500" />
               <span className="absolute inset-0 bg-gradient-to-r from-purple-400 to-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <span className="relative flex items-center gap-2">
+              <span className="relative flex items-center justify-center gap-2">
                 Get Your Free Growth Audit
-                <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
               </span>
             </button>
             <button
               onClick={onCaseStudiesClick}
-              className="px-8 py-4 rounded-full font-semibold text-white/80 border border-white/15 hover:bg-white/8 hover:text-white hover:border-white/30 transition-all duration-300 text-base backdrop-blur-sm"
+              className="px-5 sm:px-7 md:px-8 py-3 md:py-4 rounded-full font-semibold text-white/80 border border-white/15 hover:bg-white/8 hover:text-white hover:border-white/30 transition-all duration-300 text-sm md:text-base backdrop-blur-sm"
             >
               View Case Studies
             </button>
@@ -342,16 +326,16 @@ function AmbientGlow({ stage, opacity }: { stage: typeof stages[0]; opacity: num
 // ─── PROGRESS INDICATOR ────────────────────────────────────────────────────────
 function ProgressIndicator({ scrollProgress }: { scrollProgress: number }) {
   return (
-    <div className="absolute right-6 top-1/2 -translate-y-1/2 flex flex-col items-end gap-3 z-20">
+    <div className="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 flex flex-col items-end gap-2 md:gap-3 z-20">
       {stages.map((stage, i) => {
         const [s, e] = stage.range;
         const active = scrollProgress >= s && scrollProgress < e;
         const done = scrollProgress >= e;
         return (
-          <div key={i} className="flex items-center gap-2">
-            {/* label — only on active */}
+          <div key={i} className="flex items-center gap-1.5 md:gap-2">
+            {/* label — only on active, hidden on mobile */}
             <span
-              className="text-[9px] font-bold tracking-widest uppercase text-white/40 transition-all duration-500 overflow-hidden"
+              className="hidden md:block text-[9px] font-bold tracking-widest uppercase text-white/40 transition-all duration-500 overflow-hidden"
               style={{
                 maxWidth: active ? '80px' : '0px',
                 opacity: active ? 1 : 0,
@@ -481,12 +465,13 @@ export default function ScrollStorySection({ onAuditClick }: ScrollStorySectionP
       });
 
     loadImage(0).then(() => {
-      const batchSize = 20;
+      // Small batch size + higher delay prevents network exhaustion (ERR_INSUFFICIENT_RESOURCES)
+      const batchSize = 4;
       const loadBatch = async (start: number) => {
         if (start >= TOTAL_FRAMES) return;
         const end = Math.min(start + batchSize, TOTAL_FRAMES);
         await Promise.all(Array.from({ length: end - start }, (_, j) => loadImage(start + j)));
-        setTimeout(() => loadBatch(end), 16);
+        setTimeout(() => loadBatch(end), 50);
       };
       loadBatch(1);
     });
