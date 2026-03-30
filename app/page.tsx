@@ -186,60 +186,80 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #050815 0%, #02030A 100%)' }}>
+    <div className="min-h-screen cinematic-grain" style={{ background: 'linear-gradient(180deg, #050815 0%, #02030A 100%)' }}>
       <PremiumNavbar />
 
       {/* ─── HERO ─────────────────────────────────────────────── */}
       <section id="overview" className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
-        {/* Ambient glow orbs */}
+        {/* Animated ambient orbs */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute -top-40 left-1/4 w-[600px] h-[600px] rounded-full opacity-20"
-            style={{ background: 'radial-gradient(circle, #A855F7 0%, transparent 70%)' }} />
-          <div className="absolute -bottom-40 right-1/4 w-[500px] h-[500px] rounded-full opacity-15"
-            style={{ background: 'radial-gradient(circle, #3B82F6 0%, transparent 70%)' }} />
+          {/* Primary purple orb */}
+          <div className="orb-drift absolute -top-40 left-[18%] w-[700px] h-[700px] rounded-full"
+            style={{ background: 'radial-gradient(circle, rgba(168,85,247,0.22) 0%, transparent 70%)' }} />
+          {/* Blue orb */}
+          <div className="orb-drift-slow absolute -bottom-60 right-[10%] w-[600px] h-[600px] rounded-full"
+            style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.18) 0%, transparent 70%)' }} />
+          {/* Accent cyan micro-orb */}
+          <div className="orb-drift absolute top-1/3 right-[30%] w-[300px] h-[300px] rounded-full"
+            style={{ background: 'radial-gradient(circle, rgba(0,214,255,0.06) 0%, transparent 70%)', animationDuration: '12s', animationDelay: '-4s' }} />
           {/* Grid pattern */}
-          <div className="absolute inset-0 opacity-[0.04]"
-            style={{ backgroundImage: 'linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)', backgroundSize: '60px 60px' }} />
+          <div className="absolute inset-0"
+            style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)', backgroundSize: '80px 80px' }} />
+          {/* Subtle horizontal glow line */}
+          <div className="absolute top-[38%] left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(168,85,247,0.15) 30%, rgba(59,130,246,0.1) 70%, transparent)' }} />
         </div>
 
         <div className="relative z-10 max-w-6xl mx-auto px-6 text-center">
           <div className="space-y-8">
-            <FadeIn delay={0.1}>
+            <FadeIn delay={0.05}>
               <GlowBadge>India&apos;s #1 Growth Systems Agency</GlowBadge>
             </FadeIn>
 
-            <FadeIn delay={0.2}>
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-bold leading-[1.05] tracking-tight">
+            <FadeIn delay={0.15}>
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-bold leading-[1.04] tracking-tight">
                 <span className="block text-white">We Build</span>
-                <span className="block bg-gradient-to-r from-purple-400 via-purple-300 to-blue-400 bg-clip-text text-transparent">
+                <span className="block text-shimmer" style={{ animationDelay: '0.5s' }}>
                   Revenue-Generating
                 </span>
                 <span className="block text-white">Growth Systems</span>
               </h1>
             </FadeIn>
 
-            <FadeIn delay={0.35}>
+            <FadeIn delay={0.3}>
               <p className="text-lg sm:text-xl text-white/50 max-w-2xl mx-auto leading-relaxed">
                 Not just marketing campaigns. We architect the systems, funnels,
                 and AI-powered automations that turn traffic into predictable revenue.
               </p>
             </FadeIn>
 
-            <FadeIn delay={0.45}>
+            <FadeIn delay={0.42}>
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <button
-                  onClick={openAudit}
-                  className="group relative px-8 py-4 rounded-full font-semibold text-white text-base overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/40 hover:-translate-y-1"
-                >
-                  <span className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-500" />
-                  <span className="absolute inset-0 bg-gradient-to-r from-purple-500 to-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <span className="relative flex items-center gap-2">
-                    Get Free Growth Audit
-                    <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                  </span>
-                </button>
+                {/* Primary CTA with orbit rings */}
+                <div className="relative group">
+                  {/* Orbit ring 1 */}
+                  <div
+                    className="orbit-ring absolute inset-[-18px] rounded-full border border-purple-500/20 pointer-events-none"
+                    style={{ borderStyle: 'dashed' }}
+                  />
+                  {/* Orbit ring 2 */}
+                  <div
+                    className="orbit-ring-reverse absolute inset-[-32px] rounded-full border border-blue-500/10 pointer-events-none"
+                    style={{ borderStyle: 'dashed' }}
+                  />
+                  <button
+                    onClick={openAudit}
+                    className="cta-shimmer group relative px-9 py-4 rounded-full font-bold text-white text-base overflow-hidden transition-all duration-300 glow-pulse hover:-translate-y-1"
+                  >
+                    <span className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-500" />
+                    <span className="absolute inset-0 bg-gradient-to-r from-purple-500 to-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <span className="relative flex items-center gap-2">
+                      Get Free Growth Audit
+                      <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                      </svg>
+                    </span>
+                  </button>
+                </div>
                 <button
                   onClick={() => document.getElementById('case-studies')?.scrollIntoView({ behavior: 'smooth' })}
                   className="px-8 py-4 rounded-full font-semibold text-white/70 border border-white/15 hover:bg-white/5 hover:text-white hover:border-white/30 transition-all duration-300"
@@ -251,7 +271,7 @@ export default function Home() {
 
             {/* Social proof */}
             <FadeIn delay={0.55}>
-              <div className="flex items-center justify-center gap-3 pt-4">
+              <div className="flex items-center justify-center gap-3 pt-2">
                 <div className="flex -space-x-2">
                   {['AK', 'PM', 'RS', 'VG', 'SN'].map((ini, i) => (
                     <div key={i} className="w-8 h-8 rounded-full border-2 border-black flex items-center justify-center text-white text-xs font-bold"
@@ -270,12 +290,30 @@ export default function Home() {
 
         {/* Scroll cue */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 animate-bounce">
-          <span className="text-xs text-white/30 tracking-widest uppercase">Scroll</span>
+          <span className="text-[10px] text-white/25 tracking-[0.3em] uppercase">Scroll</span>
           <div className="w-5 h-8 rounded-full border border-white/15 flex items-start justify-center pt-1.5">
             <div className="w-1 h-2 rounded-full bg-white/30" />
           </div>
         </div>
       </section>
+
+      {/* ─── LIVE STATS TICKER ───────────────────────────────────── */}
+      <div className="relative overflow-hidden py-3 border-y border-white/5" style={{ background: 'rgba(168,85,247,0.03)' }}>
+        <div className="flex items-center ticker-track gap-0">
+          {/* Duplicate for seamless loop */}
+          {[
+            '⚡ 50+ Brands Scaled', '📈 340% Avg Lead Growth', '💰 ₹2Cr+ Revenue Generated',
+            '🎯 4.2× Average ROAS', '🤖 AI-Powered Funnels', '-45% Avg CPL Reduction',
+            '⚡ 50+ Brands Scaled', '📈 340% Avg Lead Growth', '💰 ₹2Cr+ Revenue Generated',
+            '🎯 4.2× Average ROAS', '🤖 AI-Powered Funnels', '-45% Avg CPL Reduction',
+          ].map((item, i) => (
+            <span key={i} className="flex items-center gap-2 flex-shrink-0 pr-12">
+              <span className="text-xs font-medium text-white/35 tracking-wide">{item}</span>
+              <span className="text-purple-600/40 text-xs">•</span>
+            </span>
+          ))}
+        </div>
+      </div>
 
       {/* ─── SCROLL STORY ─────────────────────────────────────── */}
       <ScrollStorySection onAuditClick={openAudit} />
