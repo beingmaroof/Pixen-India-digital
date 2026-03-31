@@ -1,17 +1,16 @@
 "use client";
 
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { DarkPageWrapper } from '@/components/DarkUI';
 import PremiumNavbar from '@/components/PremiumNavbar';
-import { Footer, CalendlyEmbed } from '@/components';
+import { Footer } from '@/components';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function DashboardPage() {
   const { isAuthenticated, user, userData } = useAuth();
   const router = useRouter();
-  const [isCalendlyOpen, setIsCalendlyOpen] = useState(false);
 
   if (!isAuthenticated) {
     return (
@@ -90,7 +89,7 @@ export default function DashboardPage() {
                 className="px-5 py-2.5 rounded-xl border border-white/15 text-white/60 text-sm font-semibold hover:bg-white/5 hover:text-white transition-all">
                 Get Help
               </button>
-              <button onClick={() => setIsCalendlyOpen(true)}
+              <button onClick={() => router.push('/audit')}
                 className="relative px-5 py-2.5 rounded-xl font-semibold text-white text-sm overflow-hidden hover:shadow-lg hover:shadow-purple-500/30 transition-all flex items-center gap-2">
                 <span className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-500" />
                 <svg className="w-4 h-4 relative" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
@@ -130,7 +129,7 @@ export default function DashboardPage() {
                 <h3 className="text-lg font-bold text-white mb-1">Setup & Onboarding</h3>
                 <p className="text-sm text-white/40 mb-8">Your dedicated team is waiting. Let&apos;s get moving.</p>
                 <div className="relative pl-4">
-                  <div className="absolute top-2 bottom-6 left-[21px] w-px bg-white/10 rounded-full" />
+                <div className="absolute top-0 bottom-6 left-[15px] w-px bg-white/10 rounded-full" />
                   <div className="space-y-8">
                     {steps.map((step, idx) => (
                       <div key={idx} className="relative flex gap-5">
@@ -143,7 +142,7 @@ export default function DashboardPage() {
                           <h4 className="text-base font-bold text-white mb-1">{step.title}</h4>
                           <p className="text-sm text-white/40 leading-relaxed mb-3 max-w-lg">{step.desc}</p>
                           {step.isModal ? (
-                            <button onClick={() => setIsCalendlyOpen(true)}
+                            <button onClick={() => router.push('/audit')}
                               className={`text-sm font-semibold rounded-lg px-4 py-2 transition-all ${step.status === 'current' ? 'bg-white/10 text-white hover:bg-white/15' : 'bg-white/5 text-white/40'}`}>
                               {step.action}
                             </button>
@@ -231,7 +230,6 @@ export default function DashboardPage() {
         </div>
       </main>
 
-      <CalendlyEmbed isOpen={isCalendlyOpen} onClose={() => setIsCalendlyOpen(false)} />
       <Footer />
     </DarkPageWrapper>
   );

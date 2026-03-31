@@ -68,22 +68,22 @@ export default function PricingPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {plans.map((plan, i) => (
             <FadeIn key={i} delay={i * 0.1}>
-              <div className={`relative flex flex-col h-full rounded-2xl p-8 border transition-all duration-300 ${plan.popular
-                ? 'border-purple-500/50 bg-gradient-to-b from-purple-950/80 to-blue-950/40 shadow-2xl shadow-purple-900/40 scale-105'
-                : 'border-white/10 bg-white/5 backdrop-blur-sm hover:border-purple-500/30'}`}>
+              <div className={`relative flex flex-col h-full rounded-2xl border transition-all duration-300 ${plan.popular
+                ? 'border-purple-500/50 bg-gradient-to-b from-purple-950/80 to-blue-950/40 shadow-2xl shadow-purple-900/40 scale-105 pt-12 px-8 pb-8'
+                : 'border-white/10 bg-white/5 backdrop-blur-sm hover:border-purple-500/30 p-8'}`}>
 
                 {/* Popular badge */}
                 {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 flex justify-center">
-                    <span className="flex items-center gap-1.5 bg-gradient-to-r from-yellow-500 to-amber-400 text-black text-xs font-bold uppercase tracking-wide px-4 py-1.5 rounded-full shadow-lg">
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 flex justify-center z-20">
+                    <span className="flex items-center gap-1.5 bg-gradient-to-r from-yellow-500 to-amber-400 text-black text-xs font-bold uppercase tracking-wide px-4 py-1.5 rounded-full shadow-lg whitespace-nowrap">
                       <span className="w-1.5 h-1.5 rounded-full bg-black/40 animate-pulse" />
                       Most Popular
                     </span>
                   </div>
                 )}
 
-                {/* Top glow for featured */}
-                {plan.popular && <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-purple-500/0 via-purple-400 to-purple-500/0" />}
+                {/* Top glow for featured — placed below badge */}
+                {plan.popular && <div className="absolute top-8 left-0 right-0 h-px bg-gradient-to-r from-purple-500/0 via-purple-400/50 to-purple-500/0" />}
 
                 {/* Header */}
                 <div className={`text-center mb-8 pb-6 border-b ${plan.popular ? 'border-purple-500/30' : 'border-white/10'}`}>

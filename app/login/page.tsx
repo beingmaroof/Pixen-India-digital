@@ -7,9 +7,26 @@ import PremiumNavbar from '@/components/PremiumNavbar';
 import { Footer } from '@/components';
 import { DarkPageWrapper } from '@/components/DarkUI';
 import AuthInput from '@/components/AuthInput';
-import AuthButton from '@/components/AuthButton';
 import SocialLogin from '@/components/SocialLogin';
 import { signIn, signInWithGoogle, signInWithFacebook } from '@/lib/auth';
+
+// Map Supabase error codes/messages to user-friendly text
+function friendlyAuthError(msg: string): string {
+  const m = msg.toLowerCase();
+  if (m.includes('invalid login credentials') || m.includes('invalid credentials')) {
+    return 'Invalid email or password. Please check and try again.';
+  }
+  if (m.includes('email not confirmed')) {
+    return 'Please verify your email address before logging in. Check your inbox.';
+  }
+  if (m.includes('too many requests') || m.includes('rate limit')) {
+    return 'Too many attempts. Please wait a moment and try again.';
+  }
+  if (m.includes('user not found') || m.includes('no user')) {
+    return 'No account found with this email. Please sign up first.';
+  }
+  return msg || 'Failed to sign in. Please check your credentials.';
+}
 
 export default function LoginPage() {
   const router = useRouter();
@@ -42,13 +59,13 @@ export default function LoginPage() {
     try {
       const result = await signIn(formData.email, formData.password);
       if (result.error) {
-        setErrors({ submit: result.error.message || 'Failed to sign in. Please check your credentials.' });
+        setErrors({ submit: friendlyAuthError(result.error.message || '') });
         setLoading(false);
       } else {
         router.push(redirectTo);
       }
     } catch (error: any) {
-      setErrors({ submit: error.message || 'Failed to sign in. Please check your credentials.' });
+      setErrors({ submit: friendlyAuthError(error.message || '') });
       setLoading(false);
     }
   };
@@ -72,11 +89,44 @@ export default function LoginPage() {
   return (
     <DarkPageWrapper>
       <PremiumNavbar />
-      {/* Background orbs */}
+
+      {/* Animated background orbs */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-40 left-1/3 w-[500px] h-[500px] rounded-full opacity-10" style={{ background: 'radial-gradient(circle, #A855F7 0%, transparent 70%)' }} />
-        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] rounded-full opacity-8" style={{ background: 'radial-gradient(circle, #3B82F6 0%, transparent 70%)' }} />
+        {/* Static ambient orb — purple */}
+        <div
+          className="absolute -top-40 left-1/3 w-[500px] h-[500px] rounded-full opacity-10"
+          style={{ background: 'radial-gradient(circle, #A855F7 0%, transparent 70%)' }}
+        />
+        {/* Static ambient orb — blue */}
+        <div
+          className="absolute bottom-0 right-1/4 w-[400px] h-[400px] rounded-full opacity-8"
+          style={{ background: 'radial-gradient(circle, #3B82F6 0%, transparent 70%)' }}
+        />
+        {/* Breathing animated orb — center */}
+        <div
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full"
+          style={{
+            background: 'radial-gradient(circle, rgba(99,102,241,0.18) 0%, rgba(168,85,247,0.10) 40%, transparent 70%)',
+            animation: 'breathe 6s ease-in-out infinite',
+          }}
+        />
+        {/* Small pulsing orb */}
+        <div
+          className="absolute top-[30%] right-[20%] w-[200px] h-[200px] rounded-full"
+          style={{
+            background: 'radial-gradient(circle, rgba(59,130,246,0.14) 0%, transparent 70%)',
+            animation: 'breathe 8s ease-in-out infinite reverse',
+            animationDelay: '-3s',
+          }}
+        />
       </div>
+
+      <style>{`
+        @keyframes breathe {
+          0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+          50% { transform: translate(-50%, -50%) scale(1.18); opacity: 1; }
+        }
+      `}</style>
 
       <main className="relative z-10 min-h-screen flex items-center justify-center pt-20 pb-16 px-6">
         <div className="w-full max-w-md">

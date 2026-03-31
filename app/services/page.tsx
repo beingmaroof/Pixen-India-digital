@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from 'react';
+import React from 'react';
+import { useRouter } from 'next/navigation';
 import PremiumNavbar from '@/components/PremiumNavbar';
-import { Footer, CalendlyEmbed } from '@/components';
-import { DarkPageWrapper, DarkHero, DarkSection, DarkCard, DarkBadge, DarkGradientBtn, DarkCTABanner, FadeIn, DarkSectionHeader, DarkCheckItem } from '@/components/DarkUI';
+import { Footer } from '@/components';
+import { DarkPageWrapper, DarkHero, DarkSection, DarkCard, DarkGradientBtn, DarkCTABanner, FadeIn, DarkCheckItem } from '@/components/DarkUI';
 
 const services = [
   {
@@ -45,7 +46,7 @@ const services = [
 ];
 
 export default function ServicesPage() {
-  const [isCalendlyOpen, setIsCalendlyOpen] = useState(false);
+  const router = useRouter();
 
   return (
     <DarkPageWrapper>
@@ -62,7 +63,6 @@ export default function ServicesPage() {
           {services.map((svc, i) => (
             <FadeIn key={i} delay={i * 0.1}>
               <DarkCard className="flex flex-col h-full">
-                {/* Icon */}
                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-5 text-white ${svc.color === 'purple' ? 'bg-gradient-to-br from-purple-600 to-purple-800' : 'bg-gradient-to-br from-blue-600 to-blue-800'}`}>
                   {svc.icon}
                 </div>
@@ -88,7 +88,7 @@ export default function ServicesPage() {
                   {svc.points.map((pt, j) => <DarkCheckItem key={j} text={pt} color={svc.color as 'purple' | 'blue'} />)}
                 </ul>
 
-                <DarkGradientBtn onClick={() => setIsCalendlyOpen(true)} className="w-full justify-center">
+                <DarkGradientBtn onClick={() => router.push('/audit')} className="w-full justify-center">
                   Get Free Audit
                 </DarkGradientBtn>
               </DarkCard>
@@ -101,11 +101,10 @@ export default function ServicesPage() {
         title="Ready to Dominate Your Market?"
         subtitle="Book a free funnel analysis to discover exactly what's holding you back from exponential growth."
         ctaLabel="Schedule Free Analysis"
-        onCtaClick={() => setIsCalendlyOpen(true)}
+        onCtaClick={() => router.push('/audit')}
       />
 
       <Footer />
-      <CalendlyEmbed isOpen={isCalendlyOpen} onClose={() => setIsCalendlyOpen(false)} />
     </DarkPageWrapper>
   );
 }

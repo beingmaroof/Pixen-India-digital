@@ -14,6 +14,27 @@ import {
   getUserPayments,
 } from "@/lib/auth";
 
+// Detect OS and browser from userAgent
+function getDeviceInfo(): { os: string; browser: string } {
+  if (typeof window === 'undefined') return { os: 'Unknown OS', browser: 'Unknown Browser' };
+  const ua = navigator.userAgent;
+  let os = 'Unknown OS';
+  if (/Windows NT/i.test(ua)) os = 'Windows';
+  else if (/Macintosh|Mac OS X/i.test(ua)) os = 'macOS';
+  else if (/iPhone|iPad|iPod/i.test(ua)) os = 'iOS';
+  else if (/Android/i.test(ua)) os = 'Android';
+  else if (/Linux/i.test(ua)) os = 'Linux';
+
+  let browser = 'Unknown Browser';
+  if (/Edg\//i.test(ua)) browser = 'Edge';
+  else if (/OPR\/|Opera/i.test(ua)) browser = 'Opera';
+  else if (/Chrome\//i.test(ua) && !/Chromium/i.test(ua)) browser = 'Chrome';
+  else if (/Firefox\//i.test(ua)) browser = 'Firefox';
+  else if (/Safari\//i.test(ua) && !/Chrome/i.test(ua)) browser = 'Safari';
+
+  return { os, browser };
+}
+
 export default function ProfilePage() {
   const { user, userData, loading, isAuthenticated, refreshUserData } = useAuth();
   const router = useRouter();
@@ -77,11 +98,23 @@ export default function ProfilePage() {
     }
   }, []);
 
+
   const handleLogout = async () => {
     setIsLoggingOut(true);
-    await logOut();
-    router.push("/");
+    // Fallback: force redirect after 4s if auth call hangs
+    const fallbackTimer = setTimeout(() => {
+      router.push("/");
+    }, 4000);
+    try {
+      await logOut();
+      clearTimeout(fallbackTimer);
+      router.push("/");
+    } catch {
+      clearTimeout(fallbackTimer);
+      setIsLoggingOut(false);
+    }
   };
+
 
   const handleSaveNotifications = () => {
     const prefs = { marketingEmails, productUpdates, newsletter };
@@ -454,20 +487,22 @@ export default function ProfilePage() {
 
                           {/* Active Sessions */}
                           <div className="border border-white/10 bg-white/5 rounded-2xl p-8">
-                            <h3 className="text-xl font-bold text-white mb-6">Active Sessions</h3>
-                            <div className="flex items-center justify-between p-4 bg-[#02030A] border border-white/10 rounded-xl">
-                              <div className="flex items-center gap-4">
-                                <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center border border-green-500/30 text-green-400">
-                                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                                </div>
-                                <div>
-                                  <p className="font-bold text-white">Current Session</p>
-                                  <p className="text-sm text-white/40">Mac OS • Chrome • Just now</p>
-                                </div>
-                              </div>
-                              <span className="text-xs tracking-wider uppercase bg-green-500/20 text-green-400 px-3 py-1 rounded-full font-bold border border-green-500/30">Active</span>
-                            </div>
-                          </div>
+                             <h3 className="text-xl font-bold text-white mb-6">Active Sessions</h3>
+                             <div className="flex items-center justify-between p-4 bg-[#02030A] border border-white/10 rounded-xl">
+                               <div className="flex items-center gap-4">
+                                 <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center border border-green-500/30 text-green-400">
+                                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                                 </div>
+                                 <div>
+                                   <p className="font-bold text-white">Current Session</p>
+                                   <p className="text-sm text-white/40">
+                                     {(() => { const d = getDeviceInfo(); return `${d.os} • ${d.browser} • Just now`; })()}
+                                   </p>
+                                 </div>
+                               </div>
+                               <span className="text-xs tracking-wider uppercase bg-green-500/20 text-green-400 px-3 py-1 rounded-full font-bold border border-green-500/30">Active</span>
+                             </div>
+                           </div>
                         </div>
                       </div>
                     )}

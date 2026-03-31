@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import PremiumNavbar from '@/components/PremiumNavbar';
 import ScrollStorySection from '@/components/ScrollStorySection';
-import { Footer, CalendlyEmbed } from '@/components';
+import { Footer } from '@/components';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, useInView } from 'framer-motion';
@@ -174,11 +174,10 @@ const testimonials = [
 
 export default function Home() {
   const router = useRouter();
-  const [isCalendlyOpen, setIsCalendlyOpen] = useState(false);
 
   const openAudit = () => {
     track('cta_click', { label: 'get_free_audit' });
-    setIsCalendlyOpen(true);
+    router.push('/audit');
   };
 
   return (
@@ -208,7 +207,7 @@ export default function Home() {
         <div className="relative z-10 max-w-6xl mx-auto px-6 text-center">
           <div className="space-y-8">
             <FadeIn delay={0.05}>
-              <GlowBadge>India&apos;s #1 Growth Systems Agency</GlowBadge>
+              <GlowBadge>Performance-Driven Growth Systems</GlowBadge>
             </FadeIn>
 
             <FadeIn delay={0.15}>
@@ -438,8 +437,8 @@ export default function Home() {
             </h2>
           </FadeIn>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
-            {/* Connector line */}
-            <div className="hidden md:block absolute top-16 left-[16%] right-[16%] h-px bg-gradient-to-r from-purple-500/0 via-purple-500/40 to-purple-500/0" />
+            {/* Connector line — aligned to center of w-20 (80px) icon = top-10 */}
+            <div className="hidden md:block absolute top-10 left-[16%] right-[16%] h-px bg-gradient-to-r from-purple-500/0 via-purple-500/40 to-purple-500/0" />
             {[
               { num: '01', title: 'Free Growth Audit', desc: 'We analyze your funnel, ads, competitors, and opportunities. You get a detailed roadmap in 48 hours — zero fluff.', icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg> },
               { num: '02', title: 'Custom Growth Strategy', desc: 'We build a channel-specific 90-day growth plan — paid media, content, SEO, CRO — with clear KPIs and revenue targets.', icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg> },
@@ -615,7 +614,6 @@ export default function Home() {
       </section>
 
       <Footer />
-      <CalendlyEmbed isOpen={isCalendlyOpen} onClose={() => setIsCalendlyOpen(false)} />
     </div>
   );
 }
