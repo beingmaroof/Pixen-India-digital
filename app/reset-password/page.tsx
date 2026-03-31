@@ -88,6 +88,16 @@ export default function ResetPasswordPage() {
     <>
       <Navbar />
       <main className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-primary-50">
+        <button
+          onClick={() => router.back()}
+          className="absolute top-28 left-6 md:left-12 z-50 flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-gray-200 text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-all hover:scale-105 active:scale-95 shadow-sm"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          <span className="text-sm font-medium">Back</span>
+        </button>
+
         <div className="pt-20 md:pt-32 pb-12">
           <div className="container-custom">
             <div className="text-center max-w-3xl mx-auto mb-8">
