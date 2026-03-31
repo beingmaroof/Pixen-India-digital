@@ -322,67 +322,81 @@ export default function AuditPage() {
               </div>
             )}
 
-            {/* ─── STEP 3: Schedule ─── */}
+            {/* ─── STEP 3: Confirmation ─── */}
             {step === 3 && (
               <div className="text-center">
-                {/* Success checkmark */}
-                <div className="w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center"
-                  style={{ background: 'linear-gradient(135deg, #A855F7, #3B82F6)' }}>
-                  <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
+                {/* Animated success ring */}
+                <div className="relative w-24 h-24 mx-auto mb-6">
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-br from-purple-600 to-blue-500 opacity-20 animate-ping" />
+                  <div className="relative w-24 h-24 rounded-full flex items-center justify-center"
+                    style={{ background: 'linear-gradient(135deg, #A855F7, #3B82F6)' }}>
+                    <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
                 </div>
-                <h2 className="text-2xl font-bold text-white mb-3">You&apos;re All Set, {form.name.split(' ')[0]}!</h2>
-                <p className="text-white/50 text-sm leading-relaxed mb-8 max-w-md mx-auto">
-                  Your information has been received. Our team will review your details and come prepared for a focused strategy session.
-                  <br /><br />
-                  Click below to schedule your <span className="text-purple-300 font-semibold">Free 30-Min Strategy Call</span> with us:
+
+                <h2 className="text-2xl font-bold text-white mb-2">
+                  You&apos;re All Set, {form.name.split(' ')[0]}! 🎉
+                </h2>
+                <p className="text-white/50 text-sm leading-relaxed mb-8 max-w-sm mx-auto">
+                  Your growth audit request has been received. Our strategist will review your details and reach out within <span className="text-purple-300 font-semibold">24 hours</span>.
                 </p>
 
-                {/* Meeting CTA */}
+                {/* WhatsApp CTA — primary action */}
                 <a
-                  href="https://meet.google.com/sin-fcbk-sft"
+                  href={`https://wa.me/917827717445?text=Hi%20Pixen%20India!%20I%20just%20submitted%20a%20growth%20audit%20request%20for%20${encodeURIComponent(form.name)}%20(${encodeURIComponent(form.email)}).%20Looking%20forward%20to%20connecting!`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group inline-flex items-center gap-3 px-8 py-4 rounded-2xl font-bold text-white text-base relative overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/40 hover:-translate-y-1 mb-6"
+                  className="group inline-flex items-center gap-3 px-8 py-4 rounded-2xl font-bold text-white text-base relative overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-green-500/30 hover:-translate-y-1 mb-4"
                 >
-                  <span className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-500" />
-                  <span className="absolute inset-0 bg-gradient-to-r from-purple-500 to-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <svg className="w-5 h-5 relative flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M10 15.5v-7l6 3.5-6 3.5z" />
-                    <path fillRule="evenodd" d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 18a8 8 0 110-16 8 8 0 010 16z" clipRule="evenodd" />
+                  <span className="absolute inset-0 bg-gradient-to-r from-green-600 to-emerald-500" />
+                  <span className="absolute inset-0 bg-gradient-to-r from-green-500 to-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  {/* WhatsApp icon */}
+                  <svg className="w-6 h-6 relative flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
                   </svg>
-                  <span className="relative">Schedule Strategy Call on Google Meet</span>
-                  <svg className="w-4 h-4 relative group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                  </svg>
+                  <span className="relative">Chat with Us on WhatsApp</span>
                 </a>
 
-                {/* Info cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-6">
-                  {[
-                    { icon: '⏱', title: '30 Minutes', sub: 'Strategy deep dive' },
-                    { icon: '🎯', title: 'Personalised', sub: 'Based on your answers' },
-                    { icon: '🚀', title: 'Actionable', sub: 'Growth roadmap in hand' },
-                  ].map((c, i) => (
-                    <div key={i} className="rounded-xl border border-white/10 bg-white/5 p-4 text-center">
-                      <div className="text-2xl mb-1">{c.icon}</div>
-                      <p className="text-white font-semibold text-sm">{c.title}</p>
-                      <p className="text-white/40 text-xs mt-0.5">{c.sub}</p>
-                    </div>
-                  ))}
+                <p className="text-white/25 text-xs mb-8">Fastest way to connect with our team</p>
+
+                {/* What happens next — timeline */}
+                <div className="text-left rounded-2xl border border-white/10 bg-white/5 p-6 mb-6">
+                  <p className="text-xs font-bold text-purple-400 uppercase tracking-widest mb-5">What Happens Next</p>
+                  <div className="space-y-5">
+                    {[
+                      { step: '1', time: 'Within 24 hours', title: 'Team Reviews Your Details', desc: 'Our strategist studies your business, goals, and current marketing setup.' },
+                      { step: '2', time: 'Day 2', title: 'Strategy Call Scheduled', desc: 'We reach out via WhatsApp or email to confirm a convenient time slot.' },
+                      { step: '3', time: 'Day 3–5', title: 'Free Growth Audit Delivered', desc: 'You get a personalised audit report with actionable recommendations.' },
+                    ].map((item) => (
+                      <div key={item.step} className="flex gap-4">
+                        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-purple-600 to-blue-500 flex items-center justify-center text-white text-xs font-bold">
+                          {item.step}
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2 mb-0.5">
+                            <p className="text-white font-semibold text-sm">{item.title}</p>
+                            <span className="text-[10px] text-purple-400 font-medium bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 rounded-full">{item.time}</span>
+                          </div>
+                          <p className="text-white/40 text-xs leading-relaxed">{item.desc}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
-                <p className="text-white/30 text-xs mt-8">
-                  We&apos;ll also send a confirmation to <span className="text-white/50">{form.email}</span>
+                <p className="text-white/30 text-xs mb-4">
+                  Confirmation details sent to <span className="text-white/50">{form.email}</span>
                 </p>
 
                 <button onClick={() => router.push('/')}
-                  className="mt-4 text-white/40 hover:text-white/70 text-sm transition-colors underline underline-offset-2">
+                  className="text-white/40 hover:text-white/70 text-sm transition-colors underline underline-offset-2">
                   Return to homepage
                 </button>
               </div>
             )}
+
 
             {/* Navigation buttons */}
             {step < 3 && (
