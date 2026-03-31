@@ -11,10 +11,10 @@ export default function TermsPage() {
     <LegalLayout title="Terms & Conditions" lastUpdated="March 29, 2024">
       <h2>1. Agreement to Terms</h2>
       <p>
-        These Terms and Conditions constitute a legally binding agreement made between you, whether personally or on behalf of an entity ("you") 
-        and Pixen India Digital ("Company," "we," "us," or "our"), concerning your access to and use of the 
+        These Terms and Conditions constitute a legally binding agreement made between you, whether personally or on behalf of an entity (&quot;you&quot;) 
+        and Pixen India Digital (&quot;Company,&quot; &quot;we,&quot; &quot;us,&quot; or &quot;our&quot;), concerning your access to and use of the 
         https://pixenindiadigital.vercel.app website as well as any other media form, media channel, mobile website, 
-        or services related, linked, or otherwise connected thereto (collectively, the "Site").
+        or services related, linked, or otherwise connected thereto (collectively, the &quot;Site&quot;).
       </p>
       <p>
         By accessing the Site and/or purchasing our services, you agree that you have read, understood, and agree to be bound by all of these Terms and Conditions. 
@@ -31,8 +31,8 @@ export default function TermsPage() {
       <h2>3. Intellectual Property Rights</h2>
       <p>
         Unless otherwise indicated, the Site and the Services are our proprietary property and all source code, databases, functionality, software, 
-        website designs, audio, video, text, photographs, and graphics on the Site (collectively, the "Content") and the trademarks, service marks, 
-        and logos contained therein (the "Marks") are owned or controlled by us or licensed to us, and are protected by copyright and trademark laws.
+        website designs, audio, video, text, photographs, and graphics on the Site (collectively, the &quot;Content&quot;) and the trademarks, service marks, 
+        and logos contained therein (the &quot;Marks&quot;) are owned or controlled by us or licensed to us, and are protected by copyright and trademark laws.
       </p>
       <p>
         Upon full payment for marketing management services, the resulting ad creatives, copy, and campaigns designed exclusively for your brand 

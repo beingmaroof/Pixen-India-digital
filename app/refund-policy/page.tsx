@@ -43,13 +43,13 @@ export default function RefundPolicyPage() {
         If you believe you qualify for an exceptional refund based on the criteria above, you must submit a formal request:
       </p>
       <ol>
-        <li>Email our billing department at <strong>Pixenindiadigital@gmail.com</strong> with the subject line "Refund Request - [Your Order ID]".</li>
+        <li>Email our billing department at <strong>Pixenindiadigital@gmail.com</strong> with the subject line &quot;Refund Request - [Your Order ID]&quot;.</li>
         <li>Include proof of payment, screenshot of the duplicate charge (if applicable), and a detailed explanation of why the refund is requested.</li>
         <li>Our team will investigate the claim and respond within 5-7 business days.</li>
       </ol>
       <p>
         If a refund is approved by our management team, it will be processed directly back to the original method of payment via Razorpay. 
-        Please allow 5-10 business days for the credit to appear on your bank statement, depending on your card issuer's policies.
+        Please allow 5-10 business days for the credit to appear on your bank statement, depending on your card issuer&apos;s policies.
       </p>
 
       <h2>5. Advertising Spend Ad-Hoc Payments</h2>

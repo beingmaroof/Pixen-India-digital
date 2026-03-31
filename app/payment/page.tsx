@@ -139,7 +139,7 @@ export default function PaymentPage() {
       });
 
       if (!orderRes.ok) {
-        const err = await orderRes.json();
+        const err = await orderRes.json().catch(() => ({ error: 'Could not create payment order.' }));
         toast.error(err.error || 'Could not create payment order.');
         setIsProcessing(false);
         return;
@@ -165,6 +165,13 @@ export default function PaymentPage() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(response),
           });
+
+          if (!verifyRes.ok) {
+            const err = await verifyRes.json().catch(() => ({}));
+            toast.error(err.error || 'Payment verification failed. Please contact support.');
+            setIsProcessing(false);
+            return;
+          }
 
           const { verified } = await verifyRes.json();
           if (!verified) {
@@ -249,7 +256,7 @@ export default function PaymentPage() {
                   </div>
 
                   <div className="space-y-4 pt-8 border-t border-white/10 relative z-10">
-                    <h3 className="font-bold text-white text-sm uppercase tracking-wider">What's included:</h3>
+                    <h3 className="font-bold text-white text-sm uppercase tracking-wider">What&apos;s included:</h3>
                     <ul className="space-y-4">
                       {selectedPlan.features.map((feature, i) => (
                         <li key={i} className="flex items-start gap-3 text-sm text-white/70 font-medium tracking-wide">
@@ -299,7 +306,7 @@ export default function PaymentPage() {
                   <div className="p-8 md:p-12 relative z-10">
                     <div className="mb-10 block">
                       <h2 className="text-3xl font-extrabold text-white mb-2 tracking-tight">Secure Checkout</h2>
-                      <p className="text-white/40 text-sm font-medium">You're one step away from accelerating your growth</p>
+                      <p className="text-white/40 text-sm font-medium">You&apos;re one step away from accelerating your growth</p>
                     </div>
 
                     {/* User info summary */}
@@ -366,7 +373,7 @@ export default function PaymentPage() {
 
                       <div className="mt-8 text-center text-xs text-white/40 space-y-3 leading-relaxed max-w-sm mx-auto">
                         <p>
-                          By clicking "Pay via Razorpay", you explicitly agree to our{' '}
+                          By clicking &quot;Pay via Razorpay&quot;, you explicitly agree to our{' '}
                           <Link href="/terms" className="text-white/60 font-medium hover:text-white transition-colors underline decoration-white/30 underline-offset-2">Terms & Conditions</Link>,{' '}
                           <Link href="/privacy-policy" className="text-white/60 font-medium hover:text-white transition-colors underline decoration-white/30 underline-offset-2">Privacy Policy</Link>, and our{' '}
                           <Link href="/refund-policy" className="text-white/60 font-medium hover:text-white transition-colors underline decoration-white/30 underline-offset-2">Strictly No Refund Policy</Link>.

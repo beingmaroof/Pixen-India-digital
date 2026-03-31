@@ -22,7 +22,7 @@ export default function ShippingPolicyPage() {
 
       <h2>3. Digital Delivery Framework</h2>
       <p>
-        Because our products are purely digital services, "delivery" is defined as the granting of access to our agency infrastructure or the electronic handover of files and reports.
+        Because our products are purely digital services, &quot;delivery&quot; is defined as the granting of access to our agency infrastructure or the electronic handover of files and reports.
       </p>
       <p>Our standard delivery procedure follows these steps:</p>
       <ul>
@@ -33,7 +33,7 @@ export default function ShippingPolicyPage() {
 
       <h2>4. Acceptance of Digital Delivery</h2>
       <p>
-        By completing a purchase for Pixen India Digital's services through our payment gateway (e.g., Razorpay), you explicitly acknowledge that you are purchasing a digital service and that no physical goods will be shipped to your billing address.
+        By completing a purchase for Pixen India Digital&apos;s services through our payment gateway (e.g., Razorpay), you explicitly acknowledge that you are purchasing a digital service and that no physical goods will be shipped to your billing address.
       </p>
 
       <h2>5. Delays in Digital Delivery</h2>

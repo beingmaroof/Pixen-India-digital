@@ -11,7 +11,7 @@ export default function PrivacyPolicyPage() {
     <LegalLayout title="Privacy Policy" lastUpdated="March 29, 2024">
       <h2>1. Introduction</h2>
       <p>
-        Pixen India Digital ("we," "our," or "us") respects your privacy and is committed to protecting your personal data. 
+        Pixen India Digital (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;) respects your privacy and is committed to protecting your personal data. 
         This privacy policy describes how we collect, use, and safeguard your personal information when you visit our website 
         (https://pixenindiadigital.vercel.app) and use our digital marketing and consulting services.
       </p>
@@ -44,7 +44,7 @@ export default function PrivacyPolicyPage() {
         We may share your data with trusted third-party service providers who assist us in operating our website, conducting our business, or serving our users, so long as those parties agree to keep this information confidential. 
       </p>
       <ul>
-        <li><strong>Payment Processors:</strong> We use Razorpay to process payments securely. Razorpay's use of your personal information is governed by their privacy policy.</li>
+        <li><strong>Payment Processors:</strong> We use Razorpay to process payments securely. Razorpay&apos;s use of your personal information is governed by their privacy policy.</li>
         <li><strong>Database and Authentication:</strong> We use Supabase for secure backend infrastructure and user authentication.</li>
         <li><strong>Analytics:</strong> We may use Google Analytics or similar providers to monitor and analyze the use of our service.</li>
       </ul>

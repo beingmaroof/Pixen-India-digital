@@ -61,7 +61,7 @@ export default function ContactForm() {
       if (!formData.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
         newErrors.email = 'Please enter a valid email address';
       if (formData.phone.trim()) {
-        const cleaned = formData.phone.replace(/\s+/g, '');
+        const cleaned = formData.phone.replace(/\s+/g, '').replace(/^\+91/, '');
         if (!/^[6-9]\d{9}$/.test(cleaned))
           newErrors.phone = 'Enter a valid 10-digit Indian mobile number';
       }
@@ -323,7 +323,7 @@ export default function ContactForm() {
                 placeholder="Example: We get traffic but very few leads convert. We want to scale from ₹50L to ₹1Cr/month revenue in 6 months through Meta ads and SEO..."
               />
               {errors.message && <p className="mt-1.5 text-sm text-red-600">{errors.message}</p>}
-              <p className="mt-1.5 text-xs text-gray-400">{formData.message.length}/10 min characters</p>
+              <p className="mt-1.5 text-xs text-gray-400">{formData.message.length} characters (minimum 10 required)</p>
             </div>
             <div className="bg-amber-50 rounded-xl p-4 text-sm text-amber-800 flex gap-3">
               <span className="text-lg">💡</span>

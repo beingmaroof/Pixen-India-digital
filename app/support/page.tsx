@@ -141,7 +141,7 @@ export default function SupportPage() {
                           </svg>
                         </div>
                         <h4 className="text-2xl font-bold text-white mb-3">Message Sent Successfully!</h4>
-                        <p className="text-white/60 mb-8 leading-relaxed max-w-sm mx-auto">We've received your request and our support engineers are already reviewing your case.</p>
+                        <p className="text-white/60 mb-8 leading-relaxed max-w-sm mx-auto">We&apos;ve received your request and our support engineers are already reviewing your case.</p>
                         <button 
                           onClick={() => { setStatus('idle'); setFormData({ name: '', email: '', phone: '', problem: '' }); }} 
                           className="px-8 py-3 rounded-xl bg-white/5 border border-white/10 text-white font-bold hover:bg-white/10 transition-colors"

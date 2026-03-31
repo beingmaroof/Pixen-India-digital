@@ -53,7 +53,7 @@ export default function LegalLayout({ title, lastUpdated, children }: LegalLayou
                 <div className="relative z-10">
                   <h3 className="text-lg font-bold text-white mb-2">Have Questions?</h3>
                   <p className="text-white/40 mb-6 max-w-lg mx-auto text-sm leading-relaxed">
-                    If you have any questions or require further clarification about our {title.toLowerCase()}, please don't hesitate to reach out to our legal team.
+                    If you have any questions or require further clarification about our {title.toLowerCase()}, please don&apos;t hesitate to reach out to our legal team.
                   </p>
                   <a 
                     href="mailto:Pixenindiadigital@gmail.com" 

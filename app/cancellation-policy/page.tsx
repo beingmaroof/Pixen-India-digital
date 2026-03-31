@@ -17,7 +17,7 @@ export default function CancellationPolicyPage() {
       </p>
       <p>
         By engaging our services, you agree that a cancellation requires advanced written notice, protecting both your business transition 
-        and our agency's scheduled labor.
+        and our agency&apos;s scheduled labor.
       </p>
 
       <h2>2. Notice Period Requirement</h2>
@@ -68,7 +68,7 @@ export default function CancellationPolicyPage() {
         To submit a formal cancellation request, DO NOT use WhatsApp, social media DMs, or verbal communication. It must be written via email to ensure a legal record.
       </p>
       <p>
-        Send your cancellation notice to: <strong>Pixenindiadigital@gmail.com</strong> with the subject line "Cancellation Notice - [Your Company Name]".
+        Send your cancellation notice to: <strong>Pixenindiadigital@gmail.com</strong> with the subject line &quot;Cancellation Notice - [Your Company Name]&quot;.
       </p>
     </LegalLayout>
   );

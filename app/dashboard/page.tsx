@@ -129,7 +129,7 @@ export default function DashboardPage() {
                 <h3 className="text-lg font-bold text-white mb-1">Setup & Onboarding</h3>
                 <p className="text-sm text-white/40 mb-8">Your dedicated team is waiting. Let&apos;s get moving.</p>
                 <div className="relative pl-4">
-                <div className="absolute top-0 bottom-6 left-[15px] w-px bg-white/10 rounded-full" />
+                  <div className="absolute top-0 bottom-6 left-[15px] w-px bg-white/10 rounded-full" />
                   <div className="space-y-8">
                     {steps.map((step, idx) => (
                       <div key={idx} className="relative flex gap-5">

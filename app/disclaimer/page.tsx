@@ -21,7 +21,7 @@ export default function DisclaimerPage() {
         are not to be considered as average earnings. Testimonials are not statistically representative.
       </p>
       
-      <h2>2. "No Guaranteed Results" Clause</h2>
+      <h2>2. &quot;No Guaranteed Results&quot; Clause</h2>
       <p>
         Success in any business endeavor depends on numerous factors completely outside our control, including your background, dedication, team execution, 
         budget restrictions, changing market conditions, software algorithm updates, and overall product-market fit.
