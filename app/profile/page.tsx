@@ -101,17 +101,18 @@ export default function ProfilePage() {
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
-    // Fallback: force redirect after 4s if auth call hangs
+    // Fallback: force hard redirect after 4s if Supabase hangs
     const fallbackTimer = setTimeout(() => {
-      router.push("/");
+      window.location.href = '/login';
     }, 4000);
     try {
       await logOut();
       clearTimeout(fallbackTimer);
-      router.push("/");
     } catch {
       clearTimeout(fallbackTimer);
-      setIsLoggingOut(false);
+    } finally {
+      // Always hard-navigate to ensure session is flushed from the browser
+      window.location.href = '/login';
     }
   };
 
@@ -245,13 +246,16 @@ export default function ProfilePage() {
                       {(loading || !userData) ? (
                         <div className="w-full h-full rounded-full animate-pulse bg-white/10" />
                       ) : (
-                        userData?.display_name ? userData.display_name.charAt(0).toUpperCase() : user?.email?.charAt(0).toUpperCase()
+                        (userData?.display_name || user?.email || 'U').charAt(0).toUpperCase()
                       )}
                     </div>
                     {(loading || !userData) ? (
                       <div className="h-4 w-32 bg-white/10 animate-pulse rounded mx-auto mt-4"></div>
                     ) : (
-                      <p className="mt-4 text-sm font-medium text-white/60 break-all">{userData?.display_name || user?.email}</p>
+                      <>
+                        <p className="mt-3 text-base font-bold text-white truncate max-w-full">{userData?.display_name || 'Your Account'}</p>
+                        <p className="mt-0.5 text-xs text-white/40 truncate max-w-full">{user?.email}</p>
+                      </>
                     )}
                     <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-[1px] bg-gradient-to-r from-transparent via-purple-500/50 to-transparent" />
                   </div>

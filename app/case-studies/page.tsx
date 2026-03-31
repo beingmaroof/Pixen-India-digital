@@ -81,7 +81,7 @@ export default function CaseStudiesPage() {
 
                 {/* CTA */}
                 <div className="mt-auto pt-4 border-t border-white/10">
-                  <DarkGradientBtn onClick={() => router.push('/contact')} className="w-full">
+                  <DarkGradientBtn onClick={() => router.push('/audit')} className="w-full">
                     Get Similar Results
                   </DarkGradientBtn>
                 </div>
@@ -93,9 +93,9 @@ export default function CaseStudiesPage() {
 
       <DarkCTABanner
         title="Want Results Like These?"
-        subtitle="Let's create your success story together. Book a free consultation today."
-        ctaLabel="Schedule Your Free Strategy Call"
-        onCtaClick={() => router.push('/contact')}
+        subtitle="Let&apos;s create your success story together. Book a free strategy session today."
+        ctaLabel="Book Your Free Strategy Call"
+        onCtaClick={() => router.push('/audit')}
       />
 
       <Footer />

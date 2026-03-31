@@ -3,8 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
-import CalendlyEmbed from './CalendlyEmbed';
+import { usePathname, useRouter } from 'next/navigation';
 import AvatarMenu from './AvatarMenu';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -19,9 +18,9 @@ const navLinks = [
 export default function PremiumNavbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [isCalendlyOpen, setIsCalendlyOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
   const { isAuthenticated, loading } = useAuth();
 
   useEffect(() => {
@@ -36,6 +35,11 @@ export default function PremiumNavbar() {
     else document.body.style.overflow = '';
     return () => { document.body.style.overflow = ''; };
   }, [mobileOpen]);
+
+  const handleGetAudit = () => {
+    setMobileOpen(false);
+    router.push('/audit');
+  };
 
   return (
     <>
@@ -95,10 +99,10 @@ export default function PremiumNavbar() {
                 ) : isAuthenticated ? (
                   <>
                     <button
-                      onClick={() => setIsCalendlyOpen(true)}
+                      onClick={handleGetAudit}
                       className="text-sm font-medium text-white/70 hover:text-white transition-colors"
                     >
-                      Book Call
+                      Free Audit
                     </button>
                     <AvatarMenu />
                   </>
@@ -108,7 +112,7 @@ export default function PremiumNavbar() {
                       Sign In
                     </Link>
                     <button
-                      onClick={() => setIsCalendlyOpen(true)}
+                      onClick={handleGetAudit}
                       className="relative px-5 py-2 rounded-full text-sm font-semibold text-white overflow-hidden group transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/30 hover:-translate-y-0.5"
                     >
                       <span className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-500 transition-opacity duration-300" />
@@ -163,7 +167,7 @@ export default function PremiumNavbar() {
             )}
             {isMounted && !loading && isAuthenticated && <AvatarMenu />}
             <button
-              onClick={() => { setMobileOpen(false); setIsCalendlyOpen(true); }}
+              onClick={handleGetAudit}
               className="w-full py-3.5 rounded-full font-bold text-white bg-gradient-to-r from-purple-600 to-blue-500 hover:opacity-90 transition-opacity shadow-[0_0_20px_rgba(168,85,247,0.3)]"
             >
               Get Free Audit
@@ -171,8 +175,6 @@ export default function PremiumNavbar() {
           </div>
         </div>
       </div>
-
-      <CalendlyEmbed isOpen={isCalendlyOpen} onClose={() => setIsCalendlyOpen(false)} />
     </>
   );
 }

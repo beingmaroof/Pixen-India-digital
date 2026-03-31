@@ -142,22 +142,25 @@ export default function AuditPage() {
   };
 
   const saveLead = async () => {
+    // Wrap in a 10-second timeout so a slow/failed DB call never blocks the user
+    const savePromise = supabase.from('leads').insert([{
+      name: form.name,
+      email: form.email,
+      phone: form.phone,
+      business_type: form.businessType,
+      revenue_range: form.revenue,
+      current_channels: form.channels,
+      goals: form.goals.concat(form.customGoal ? [form.customGoal] : []),
+      budget_range: form.budget,
+      timeline: form.timeline,
+      source: 'audit_form',
+      created_at: new Date().toISOString(),
+    }]);
+    const timeout = new Promise<void>((resolve) => setTimeout(resolve, 10000));
     try {
-      await supabase.from('leads').insert([{
-        name: form.name,
-        email: form.email,
-        phone: form.phone,
-        business_type: form.businessType,
-        revenue_range: form.revenue,
-        current_channels: form.channels,
-        goals: form.goals.concat(form.customGoal ? [form.customGoal] : []),
-        budget_range: form.budget,
-        timeline: form.timeline,
-        source: 'audit_form',
-        created_at: new Date().toISOString(),
-      }]);
+      await Promise.race([savePromise, timeout]);
     } catch (err) {
-      // silently continue — we show the schedule page either way
+      // Silently continue — user still sees the scheduling page
       console.error('Lead save error:', err);
     }
   };
@@ -166,9 +169,15 @@ export default function AuditPage() {
     if (!validate()) return;
     if (step === 2) {
       setSubmitting(true);
-      await saveLead();
-      setSubmitting(false);
-      setSubmitted(true);
+      try {
+        await saveLead();
+      } finally {
+        // Always advance — never leave user stuck on submitting state
+        setSubmitting(false);
+        setSubmitted(true);
+        setStep(3);
+      }
+      return; // step already set above
     }
     setStep(s => Math.min(s + 1, TOTAL_STEPS - 1));
   };

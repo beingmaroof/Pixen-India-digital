@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import PremiumNavbar from '@/components/PremiumNavbar';
-import { Footer, CalendlyEmbed } from '@/components';
-import { DarkPageWrapper, DarkHero, DarkSection, DarkCard, DarkBadge, DarkGradientBtn, DarkCTABanner, FadeIn, DarkSectionHeader, DarkCheckItem } from '@/components/DarkUI';
+import { Footer } from '@/components';
+import { DarkPageWrapper, DarkHero, DarkSection, DarkGradientBtn, DarkCTABanner, FadeIn, DarkSectionHeader } from '@/components/DarkUI';
 import Link from 'next/link';
 
 const plans = [
@@ -45,7 +45,6 @@ const faqs = [
 export default function PricingPage() {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
-  const [isCalendlyOpen, setIsCalendlyOpen] = useState(false);
 
   const handlePurchase = (planName: string) => {
     const targetUrl = `/payment?plan=${encodeURIComponent(planName.toLowerCase())}`;
@@ -143,11 +142,10 @@ export default function PricingPage() {
         title="Ready to dominate your market?"
         subtitle="Join 50+ successful clients who've turned their digital presence into a revenue-generating machine."
         ctaLabel="Schedule Free Consultation"
-        onCtaClick={() => setIsCalendlyOpen(true)}
+        onCtaClick={() => router.push('/audit')}
       />
 
       <Footer />
-      <CalendlyEmbed isOpen={isCalendlyOpen} onClose={() => setIsCalendlyOpen(false)} />
     </DarkPageWrapper>
   );
 }
