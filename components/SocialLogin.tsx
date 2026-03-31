@@ -14,13 +14,10 @@ interface SocialLoginProps {
 export default function SocialLogin({ onGoogleLogin, onFacebookLogin, loading }: SocialLoginProps) {
   return (
     <div className="space-y-3">
-      <div className="relative my-2">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-white/10"></div>
-        </div>
-        <div className="relative flex justify-center text-sm">
-          <span className="px-4 text-white/40 text-xs font-medium tracking-wider uppercase" style={{ background: 'transparent' }}>or continue with</span>
-        </div>
+      <div className="flex items-center my-4">
+        <div className="flex-1 border-t border-white/10"></div>
+        <span className="px-4 text-white/40 text-xs font-medium tracking-wider uppercase">or continue with</span>
+        <div className="flex-1 border-t border-white/10"></div>
       </div>
 
       <AuthButton

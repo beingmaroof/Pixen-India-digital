@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, Suspense } from 'react';
+import React, { useState, Suspense, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import PremiumNavbar from '@/components/PremiumNavbar';
@@ -52,11 +52,23 @@ function LoginForm() {
   const prefillEmail = searchParams.get('email') || '';
 
   const [loading, setLoading] = useState(false);
+  const [isSocialLoading, setIsSocialLoading] = useState(false);
   const [formData, setFormData] = useState({ email: prefillEmail, password: '' });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [rememberMe, setRememberMe] = useState(false);
   // 'general' | 'wrong_password' | 'no_account'
   const [errorType, setErrorType] = useState<string>('general');
+
+  useEffect(() => {
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        setLoading(false);
+        setIsSocialLoading(false);
+      }
+    };
+    window.addEventListener('pageshow', handlePageShow);
+    return () => window.removeEventListener('pageshow', handlePageShow);
+  }, []);
 
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
@@ -76,20 +88,7 @@ function LoginForm() {
     setErrorType('general');
 
     try {
-      // Step 1: Check whether this email exists in the users table
-      const emailExists = await checkEmailExists(formData.email);
-
-      if (!emailExists) {
-        // Email not found → guide user to sign up with pre‑filled email
-        setErrors({
-          submit: `No account found for "${formData.email}". Create a new account to get started.`,
-        });
-        setErrorType('no_account');
-        setLoading(false);
-        return;
-      }
-
-      // Step 2: Email exists → attempt actual sign-in
+      // Step 1: Attempt actual sign-in
       const result = await signIn(formData.email, formData.password);
 
       if (result.error) {
@@ -99,8 +98,15 @@ function LoginForm() {
           msg.toLowerCase().includes('invalid credentials');
 
         if (isInvalidCredentials) {
-          setErrors({ submit: 'Incorrect password. Please try again or reset your password.' });
-          setErrorType('wrong_password');
+          // Verify if email really doesn't exist or it's just wrong password
+          const emailExists = await checkEmailExists(formData.email);
+          if (!emailExists) {
+            setErrors({ submit: `No account found for "${formData.email}". Create a new account to get started.` });
+            setErrorType('no_account');
+          } else {
+            setErrors({ submit: 'Incorrect password. Please try again or reset your password.' });
+            setErrorType('wrong_password');
+          }
         } else {
           setErrors({ submit: friendlyAuthError(msg) });
           setErrorType('general');
@@ -116,19 +122,19 @@ function LoginForm() {
   };
 
   const handleGoogleLogin = async () => {
-    setLoading(true);
+    setIsSocialLoading(true);
     try {
       const result = await signInWithGoogle(redirectTo);
-      if (result.error) { setErrors({ submit: result.error.message || 'Failed to sign in with Google' }); setLoading(false); }
-    } catch (error: any) { setErrors({ submit: error.message || 'Failed to sign in with Google' }); setLoading(false); }
+      if (result.error) { setErrors({ submit: result.error.message || 'Failed to sign in with Google' }); setIsSocialLoading(false); }
+    } catch (error: any) { setErrors({ submit: error.message || 'Failed to sign in with Google' }); setIsSocialLoading(false); }
   };
 
   const handleFacebookLogin = async () => {
-    setLoading(true);
+    setIsSocialLoading(true);
     try {
       const result = await signInWithFacebook(redirectTo);
-      if (result.error) { setErrors({ submit: result.error.message || 'Failed to sign in with Facebook' }); setLoading(false); }
-    } catch (error: any) { setErrors({ submit: error.message || 'Failed to sign in with Facebook' }); setLoading(false); }
+      if (result.error) { setErrors({ submit: result.error.message || 'Failed to sign in with Facebook' }); setIsSocialLoading(false); }
+    } catch (error: any) { setErrors({ submit: error.message || 'Failed to sign in with Facebook' }); setIsSocialLoading(false); }
   };
 
   return (
@@ -206,7 +212,7 @@ function LoginForm() {
         </form>
 
         <div className="mt-6">
-          <SocialLogin onGoogleLogin={handleGoogleLogin} onFacebookLogin={handleFacebookLogin} loading={loading} />
+          <SocialLogin onGoogleLogin={handleGoogleLogin} onFacebookLogin={handleFacebookLogin} loading={loading || isSocialLoading} />
         </div>
 
         <div className="mt-6 text-center">
