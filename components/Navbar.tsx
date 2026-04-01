@@ -7,13 +7,11 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import Button from './Button';
-import CalendlyEmbed from './CalendlyEmbed';
 import AvatarMenu from './AvatarMenu';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isCalendlyOpen, setIsCalendlyOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
@@ -106,7 +104,7 @@ export default function Navbar() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setIsCalendlyOpen(true)}
+                    onClick={() => router.push('/audit')}
                     className="shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
                   >
                     Book Consultation
@@ -123,7 +121,7 @@ export default function Navbar() {
                   <Button
                     variant="primary"
                     size="sm"
-                    onClick={() => setIsCalendlyOpen(true)}
+                    onClick={() => router.push('/audit')}
                     className="shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
                   >
                     Book Consultation
@@ -195,7 +193,7 @@ export default function Navbar() {
                     fullWidth
                     onClick={() => {
                       setIsMobileMenuOpen(false);
-                      setIsCalendlyOpen(true);
+                      router.push('/audit');
                     }}
                     className="shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200"
                   >
@@ -218,7 +216,7 @@ export default function Navbar() {
                     fullWidth
                     onClick={() => {
                       setIsMobileMenuOpen(false);
-                      setIsCalendlyOpen(true);
+                      router.push('/audit');
                     }}
                     className="shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200"
                   >
@@ -230,7 +228,6 @@ export default function Navbar() {
           </div>
         )}
       </div>
-      <CalendlyEmbed isOpen={isCalendlyOpen} onClose={() => setIsCalendlyOpen(false)} />
     </nav>
   );
 }

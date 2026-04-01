@@ -72,7 +72,7 @@ function getEmailContent(type: EmailBody['type'], name: string, planName?: strin
               Thank you for requesting a free growth audit! We review every application personally and will respond within <strong>24 hours</strong> — usually faster.
             </p>
             <div style="text-align: center; margin: 0 0 32px 0;">
-              <a href="https://calendly.com/pixenindia/free-consultation" style="display: inline-block; background: linear-gradient(135deg, ${BRAND_COLOR}, #6366f1); color: white; font-weight: 700; font-size: 16px; padding: 14px 32px; border-radius: 10px; text-decoration: none;">
+              <a href="https://pixen.in/audit" style="display: inline-block; background: linear-gradient(135deg, ${BRAND_COLOR}, #6366f1); color: white; font-weight: 700; font-size: 16px; padding: 14px 32px; border-radius: 10px; text-decoration: none;">
                 Book a Call Now →
               </a>
             </div>

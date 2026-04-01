@@ -70,9 +70,7 @@ export default function ContactPage() {
 
           {/* Contact form */}
           <FadeIn delay={0.15} className="lg:col-span-2">
-            <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-8">
-              <ContactForm />
-            </div>
+            <ContactForm />
           </FadeIn>
         </div>
       </DarkSection>
@@ -81,7 +79,7 @@ export default function ContactPage() {
         title="Prefer to talk directly?"
         subtitle="Schedule a free 30-minute strategy call with our team."
         ctaLabel="Book Your Free Call"
-        onCtaClick={() => window.open('https://calendly.com/pixenindia/free-consultation', '_blank')}
+        onCtaClick={() => window.location.href = '/audit'}
       />
 
       <Footer />
