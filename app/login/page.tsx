@@ -31,7 +31,7 @@ async function checkEmailProvider(email: string): Promise<{ exists: boolean; pro
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectTo = searchParams.get('redirect') || '/dashboard';
+  const redirectTo = searchParams.get('redirect') || '/';
   const prefillEmail = searchParams.get('email') || '';
 
   const [loading, setLoading] = useState(false);

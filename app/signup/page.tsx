@@ -15,7 +15,7 @@ import { trackEvent } from '@/lib/analytics';
 function SignupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectTo = searchParams.get('redirect') || '/dashboard';
+  const redirectTo = searchParams.get('redirect') || '/';
   const prefillEmail = searchParams.get('email') || '';
 
   const [loading, setLoading] = useState(false);
@@ -56,7 +56,7 @@ function SignupForm() {
       } else {
         trackEvent('signup_completed', { method: 'email' });
         toast.success("Welcome to Pixen Digital!");
-        router.push(redirectTo === '/dashboard' ? '/dashboard?success=true' : redirectTo);
+        router.push(redirectTo);
       }
     } catch (err: any) { 
       setErrors({ submit: err.message || 'Failed to create account.' }); 
