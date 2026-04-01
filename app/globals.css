@@ -63,3 +63,45 @@ body {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
 }
+
+/* ================================================
+   GLOBAL DARK INPUT SYSTEM
+   Applies to all <select> <option> across site
+   ================================================ */
+
+/* Fix select dropdown option backgrounds (Chrome/Firefox) */
+select option {
+  background-color: #0d1117;
+  color: #ffffff;
+}
+
+select {
+  /* Ensures select arrow is visible on dark bg */
+  color-scheme: dark;
+}
+
+/* Textarea dark scheme */
+textarea {
+  color-scheme: dark;
+}
+
+/* Focus ring override for all native inputs in dark contexts */
+.dark-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.3);
+  border-color: #A855F7;
+}
+
+/* Performance: GPU-accelerate commonly animated elements */
+.animate-spin,
+.animate-pulse,
+.animate-ping,
+.animate-bounce {
+  will-change: transform;
+}
+
+/* Reduce layout paint cost for fixed elements */
+.fixed {
+  will-change: auto;
+}
+

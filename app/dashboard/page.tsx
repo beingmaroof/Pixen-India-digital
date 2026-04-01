@@ -1,8 +1,8 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { DarkPageWrapper } from '@/components/DarkUI';
 import PremiumNavbar from '@/components/PremiumNavbar';
 import { Footer } from '@/components';
@@ -11,6 +11,104 @@ import { useAuth } from '@/contexts/AuthContext';
 export default function DashboardPage() {
   const { isAuthenticated, user, userData } = useAuth();
   const router = useRouter();
+
+  // Wrap the inner dashboard content in another component so we can use useSearchParams safely in Suspense
+  return (
+    <Suspense fallback={
+      <DarkPageWrapper>
+        <PremiumNavbar />
+        <div className="min-h-screen flex items-center justify-center pt-20">
+          <div className="w-12 h-12 rounded-full border-4 border-purple-500/20 border-t-purple-500 animate-spin" />
+        </div>
+      </DarkPageWrapper>
+    }>
+      <DashboardContent isAuthenticated={isAuthenticated} user={user} userData={userData} router={router} />
+    </Suspense>
+  );
+}
+
+function WelcomeModal({ onClose }: { onClose: () => void }) {
+  const router = useRouter();
+  const [step, setStep] = useState(1);
+  
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
+      
+      {/* Modal Content */}
+      <div className="relative w-full max-w-lg bg-[#0a0a0f] border border-white/10 rounded-3xl p-8 shadow-2xl overflow-hidden animate-fade-in-up">
+        {/* Glow */}
+        <div className="absolute -top-32 -right-32 w-64 h-64 bg-purple-500/30 blur-[100px] rounded-full pointer-events-none" />
+        
+        <div className="relative z-10 text-center">
+          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-600 to-blue-500 flex items-center justify-center mx-auto mb-6 shadow-lg shadow-purple-500/40 transform scale-110">
+            <span className="text-4xl">🚀</span>
+          </div>
+          
+          <h2 className="text-3xl font-bold text-white mb-2">Welcome to Pixen!</h2>
+          <p className="text-white/50 mb-8 text-sm">You are now officially part of our growth ecosystem.</p>
+          
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-4 mb-8 text-left">
+            <div className="flex justify-between items-center mb-4">
+              <span className="text-xs font-bold text-purple-400 uppercase tracking-wider">Setup Progress</span>
+              <span className="text-xs text-white/40">Step 1 of 3 Complete</span>
+            </div>
+            {/* Progress Bar */}
+            <div className="w-full h-1.5 bg-white/10 rounded-full mb-5 overflow-hidden">
+              <div className="h-full bg-gradient-to-r from-purple-500 to-blue-500 w-1/3 rounded-full" />
+            </div>
+            
+            <div className="space-y-3">
+              <div className="flex items-center gap-3 text-sm text-white/50">
+                <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center text-white shrink-0">
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                </div>
+                Create Account
+              </div>
+              <div className="flex items-center gap-3 text-sm text-white border border-white/10 bg-white/5 px-3 py-2 rounded-xl">
+                <div className="w-5 h-5 rounded-full border border-white/20 flex items-center justify-center shrink-0">2</div>
+                Complete Profile
+              </div>
+              <div className="flex items-center gap-3 text-sm text-white/50">
+                <div className="w-5 h-5 rounded-full border border-white/20 flex items-center justify-center shrink-0">3</div>
+                Book Action Plan Call
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex flex-col gap-3">
+            <button
+              onClick={() => { onClose(); router.push('/profile'); }}
+              className="w-full relative py-3.5 rounded-xl font-bold text-white overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/30 group"
+            >
+              <span className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-500" />
+              <span className="relative flex items-center justify-center gap-2">
+                Continue Setup &rarr;
+              </span>
+            </button>
+            <button onClick={onClose} className="text-sm font-semibold text-white/40 hover:text-white transition-colors py-2">
+              Explore Dashboard instead
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DashboardContent({ isAuthenticated, user, userData, router }: any) {
+  const searchParams = useSearchParams();
+  const showWelcome = searchParams.get('success') === 'true';
+  const [isWelcomeModalOpen, setIsWelcomeModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (showWelcome) {
+      setIsWelcomeModalOpen(true);
+      // Clean up the URL quietly 
+      window.history.replaceState({}, '', '/dashboard');
+    }
+  }, [showWelcome]);
 
   if (!isAuthenticated) {
     return (
@@ -230,6 +328,7 @@ export default function DashboardPage() {
         </div>
       </main>
 
+      {isWelcomeModalOpen && <WelcomeModal onClose={() => setIsWelcomeModalOpen(false)} />}
       <Footer />
     </DarkPageWrapper>
   );

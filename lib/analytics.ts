@@ -59,3 +59,16 @@ export const trackOutboundLink = (url: string, linkName: string) => {
     label: `${linkName} - ${url}`,
   });
 };
+
+export const trackEvent = (eventName: string, params?: Record<string, any>) => {
+  try {
+    if (typeof window !== 'undefined' && window.gtag) {
+      window.gtag('event', eventName, params || {});
+    }
+    if (process.env.NODE_ENV === 'development') {
+      console.info(`[Analytics] ${eventName}`, params);
+    }
+  } catch (error) {
+    console.warn("Analytics tracking failed", error);
+  }
+};

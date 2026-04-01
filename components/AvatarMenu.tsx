@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import Image from 'next/image';
+import toast from 'react-hot-toast';
 
 export default function AvatarMenu() {
   const [isOpen, setIsOpen] = useState(false);
@@ -35,12 +36,16 @@ export default function AvatarMenu() {
     try {
       await supabase.auth.signOut();
       clearTimeout(fallbackTimer);
+      toast.success('Signed out safely', { duration: 2000 });
     } catch (error) {
       console.error('Logout error:', error);
       clearTimeout(fallbackTimer);
+      toast.error('An error occurred during logout. Force clearing session...', { duration: 3000 });
     } finally {
       // Always hard-navigate to ensure session is cleared from UI
-      window.location.href = '/login';
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 500);
     }
   };
 

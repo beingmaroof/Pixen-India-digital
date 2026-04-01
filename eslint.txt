@@ -1,0 +1,10 @@
+
+C:\APP Projects\Pixen India\Pixen website\app\login\page.tsx
+  220:41  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  220:62  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+
+C:\APP Projects\Pixen India\Pixen website\components\ScrollStorySection.tsx
+  451:6  warning  React Hook useCallback has a missing dependency: 'lerpFactor'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+✖ 3 problems (2 errors, 1 warning)
+

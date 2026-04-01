@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import CalendlyEmbed from './CalendlyEmbed';
 import toast from 'react-hot-toast';
+import { trackEvent } from '@/lib/analytics';
+import Link from 'next/link';
 
 interface FormData {
   // Step 1
@@ -14,6 +16,8 @@ interface FormData {
   budget: string;
   // Step 3
   message: string;
+  // Honeypot
+  website_url?: string;
 }
 
 interface FormErrors {
@@ -26,13 +30,6 @@ interface FormErrors {
 }
 
 type SubmitStatus = 'idle' | 'submitting' | 'success' | 'error';
-
-// GA tracking helper
-const trackEvent = (name: string, params?: Record<string, string>) => {
-  if (typeof window !== 'undefined' && (window as any).gtag) {
-    (window as any).gtag('event', name, params);
-  }
-};
 
 const STEPS = [
   { title: 'Your Info', subtitle: 'Tell us who you are' },
@@ -47,6 +44,7 @@ export default function ContactForm() {
     name: '', email: '', phone: '',
     businessType: '', budget: '',
     message: '',
+    website_url: '',
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitStatus, setSubmitStatus] = useState<SubmitStatus>('idle');
@@ -183,16 +181,21 @@ export default function ContactForm() {
           </a>
           <button
             onClick={() => setIsCalendlyOpen(true)}
-            className="w-full flex items-center gap-3 text-primary-700 font-semibold hover:text-primary-800 transition-colors bg-transparent border-0 cursor-pointer"
+            className="w-full flex items-center gap-3 text-primary-700 font-semibold hover:text-primary-800 transition-colors bg-transparent border-0 cursor-pointer mb-3"
           >
             <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
             Book your strategy call immediately
           </button>
+          
+          <Link href="/case-studies" className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-primary-600/10 text-primary-700 font-bold hover:bg-primary-600/20 transition-all border border-primary-600/20">
+            Explore Case Studies
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+          </Link>
         </div>
         <button
-          onClick={() => { setSubmitStatus('idle'); setStep(1); setFormData({ name: '', email: '', phone: '', businessType: '', budget: '', message: '' }); }}
+          onClick={() => { setSubmitStatus('idle'); setStep(1); setFormData({ name: '', email: '', phone: '', businessType: '', budget: '', message: '', website_url: '' }); }}
           className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
         >
           Submit another request
@@ -204,7 +207,11 @@ export default function ContactForm() {
   }
 
   const fieldCls = (err?: string) =>
-    `w-full px-4 py-3.5 border ${err ? 'border-red-400 bg-red-50' : 'border-gray-200 bg-white'} rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-gray-900 placeholder:text-gray-400 text-base`;
+    `w-full px-4 py-3.5 border rounded-xl focus:ring-2 focus:border-transparent transition-all text-base text-white placeholder:text-white/30 
+     ${err 
+       ? 'border-red-500/60 bg-red-500/5 focus:ring-red-500/40' 
+       : 'border-white/10 bg-white/5 hover:border-white/20 focus:ring-purple-500/40 focus:border-purple-500'
+     }`;
 
   return (
     <div className="w-full max-w-2xl mx-auto">
@@ -243,28 +250,38 @@ export default function ContactForm() {
       </div>
 
       <form onSubmit={step === 3 ? handleSubmit : (e) => { e.preventDefault(); handleNext(); }}>
+        {/* Anti-spam honeypot - hidden from real users */}
+        <input 
+          type="text" 
+          name="website_url" 
+          value={formData.website_url || ''} 
+          onChange={handleChange} 
+          style={{ display: 'none' }} 
+          tabIndex={-1} 
+          autoComplete="off" 
+        />
 
         {/* STEP 1: Contact Info */}
         {step === 1 && (
           <div className="space-y-5 animate-fade-in-up">
             <div>
-              <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-2">Full Name *</label>
+              <label htmlFor="name" className="block text-sm font-semibold text-white/70 mb-2">Full Name *</label>
               <input type="text" id="name" name="name" value={formData.name} onChange={handleChange}
                 className={fieldCls(errors.name)} placeholder="Rahul Sharma" autoFocus />
               {errors.name && <p className="mt-1.5 text-sm text-red-600">{errors.name}</p>}
             </div>
             <div>
-              <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">Business Email *</label>
+              <label htmlFor="email" className="block text-sm font-semibold text-white/70 mb-2">Business Email *</label>
               <input type="email" id="email" name="email" value={formData.email} onChange={handleChange}
                 className={fieldCls(errors.email)} placeholder="rahul@yourbusiness.com" />
               {errors.email && <p className="mt-1.5 text-sm text-red-600">{errors.email}</p>}
             </div>
             <div>
-              <label htmlFor="phone" className="block text-sm font-semibold text-gray-700 mb-2">
-                WhatsApp Number <span className="text-gray-400 font-normal">(recommended for faster response)</span>
+              <label htmlFor="phone" className="block text-sm font-semibold text-white/70 mb-2">
+                WhatsApp Number <span className="text-white/30 font-normal">(recommended for faster response)</span>
               </label>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">+91</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 font-medium">+91</span>
                 <input type="tel" id="phone" name="phone" value={formData.phone} onChange={handleChange}
                   className={`${fieldCls(errors.phone)} pl-12`} placeholder="98765 43210" />
               </div>
@@ -277,7 +294,7 @@ export default function ContactForm() {
         {step === 2 && (
           <div className="space-y-5 animate-fade-in-up">
             <div>
-              <label htmlFor="businessType" className="block text-sm font-semibold text-gray-700 mb-2">Business Type *</label>
+              <label htmlFor="businessType" className="block text-sm font-semibold text-white/70 mb-2">Business Type *</label>
               <select id="businessType" name="businessType" value={formData.businessType} onChange={handleChange}
                 className={fieldCls(errors.businessType)} autoFocus>
                 <option value="">Select your business type</option>
@@ -292,7 +309,7 @@ export default function ContactForm() {
               {errors.businessType && <p className="mt-1.5 text-sm text-red-600">{errors.businessType}</p>}
             </div>
             <div>
-              <label htmlFor="budget" className="block text-sm font-semibold text-gray-700 mb-2">Monthly Marketing Budget *</label>
+              <label htmlFor="budget" className="block text-sm font-semibold text-white/70 mb-2">Monthly Marketing Budget *</label>
               <select id="budget" name="budget" value={formData.budget} onChange={handleChange}
                 className={fieldCls(errors.budget)}>
                 <option value="">Select your budget range</option>
@@ -304,7 +321,7 @@ export default function ContactForm() {
               </select>
               {errors.budget && <p className="mt-1.5 text-sm text-red-600">{errors.budget}</p>}
             </div>
-            <div className="bg-blue-50 rounded-xl p-4 text-sm text-blue-800">
+            <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 text-sm text-blue-300">
               <span className="font-semibold">Why we ask:</span> Budget helps us recommend the right growth strategy for your stage. We work with businesses across all budget ranges.
             </div>
           </div>
@@ -314,7 +331,7 @@ export default function ContactForm() {
         {step === 3 && (
           <div className="space-y-5 animate-fade-in-up">
             <div>
-              <label htmlFor="message" className="block text-sm font-semibold text-gray-700 mb-2">
+              <label htmlFor="message" className="block text-sm font-semibold text-white/70 mb-2">
                 Biggest Growth Challenge / Goal *
               </label>
               <textarea
@@ -323,9 +340,9 @@ export default function ContactForm() {
                 placeholder="Example: We get traffic but very few leads convert. We want to scale from ₹50L to ₹1Cr/month revenue in 6 months through Meta ads and SEO..."
               />
               {errors.message && <p className="mt-1.5 text-sm text-red-600">{errors.message}</p>}
-              <p className="mt-1.5 text-xs text-gray-400">{formData.message.length} characters (minimum 10 required)</p>
+              <p className="mt-1.5 text-xs text-white/30">{formData.message.length} characters (minimum 10 required)</p>
             </div>
-            <div className="bg-amber-50 rounded-xl p-4 text-sm text-amber-800 flex gap-3">
+            <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 text-sm text-amber-300 flex gap-3">
               <span className="text-lg">💡</span>
               <span>The more specific you are, the better our audit recommendations will be for your business.</span>
             </div>

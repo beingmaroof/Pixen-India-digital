@@ -2,11 +2,20 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import PremiumNavbar from '@/components/PremiumNavbar';
-import ScrollStorySection from '@/components/ScrollStorySection';
 import { Footer } from '@/components';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, useInView } from 'framer-motion';
+import dynamic from 'next/dynamic';
+
+const ScrollStorySection = dynamic(() => import('@/components/ScrollStorySection'), {
+  loading: () => (
+    <div className="h-screen flex flex-col items-center justify-center w-full" style={{ background: '#02030A' }}>
+      <div className="w-12 h-12 rounded-full border-4 border-purple-500/20 border-t-purple-500 animate-spin mb-4" />
+      <div className="text-purple-400/50 text-xs tracking-widest uppercase font-semibold">Loading Experience</div>
+    </div>
+  )
+});
 
 // GA helper
 const track = (event: string, params?: Record<string, string>) => {

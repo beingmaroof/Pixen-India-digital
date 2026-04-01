@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+import { validateOrigin } from '@/lib/security';
+import { supabaseAdmin } from '@/lib/supabase-admin';
 
 const PLAN_AMOUNTS: Record<string, number> = {
   starter: 4999900,
@@ -8,7 +10,35 @@ const PLAN_AMOUNTS: Record<string, number> = {
 
 export async function POST(req: Request) {
   try {
+    // 1. CSRF / Origin Validation
+    if (!validateOrigin(req)) {
+      console.warn("CSRF blocked cross-origin request to /api/razorpay/order");
+      return NextResponse.json({ error: "Unauthorized request origin" }, { status: 403 });
+    }
+
+    // 2. Extract Bearer Token
+    const authHeader = req.headers.get('authorization');
+    const token = authHeader?.replace(/^Bearer\s/i, '');
+    
+    if (!token) {
+      return NextResponse.json({ error: "Missing authentication token" }, { status: 401 });
+    }
+
+    // 3. Verify user securely on the server
+    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
+    
+    if (authError || !user) {
+      console.warn("Invalid token used for /api/razorpay/order");
+      return NextResponse.json({ error: "Invalid or expired session" }, { status: 401 });
+    }
+
     const { plan, userId, email } = await req.json();
+
+    // 4. Validate payload matches token owner
+    if (user.id !== userId) {
+      console.warn(`User ID mismatch in order creation. Token: ${user.id}, Payload: ${userId}`);
+      return NextResponse.json({ error: "Unauthorized access" }, { status: 403 });
+    }
 
     if (!plan || !PLAN_AMOUNTS[plan]) {
       return NextResponse.json({ error: 'Invalid plan selected' }, { status: 400 });
@@ -18,7 +48,8 @@ export async function POST(req: Request) {
     const keySecret = process.env.RAZORPAY_KEY_SECRET;
 
     if (!keyId || !keySecret) {
-      return NextResponse.json({ error: 'Payment gateway not configured. Please contact support.' }, { status: 500 });
+      console.error('Missing Razorpay env vars');
+      return NextResponse.json({ error: 'Payment gateway unconfigured temporarily' }, { status: 500 });
     }
 
     // Dynamic import to avoid SSG crash when env vars are absent
@@ -28,8 +59,18 @@ export async function POST(req: Request) {
     const order = await razorpay.orders.create({
       amount: PLAN_AMOUNTS[plan],
       currency: 'INR',
-      receipt: `receipt_${userId}_${Date.now()}`,
-      notes: { userId, email, plan },
+      receipt: `receipt_${user.id}_${Date.now()}`,
+      notes: { userId: user.id, email: user.email || '', plan },
+    }) as any;
+
+    // 5. Structured Analytics Logging
+    console.info("payment_initiated", {
+      userId: user.id,
+      email: user.email,
+      plan,
+      amount: order.amount,
+      orderId: order.id,
+      timestamp: new Date().toISOString()
     });
 
     return NextResponse.json({
@@ -40,6 +81,7 @@ export async function POST(req: Request) {
     });
   } catch (err: any) {
     console.error('Razorpay order error:', err);
-    return NextResponse.json({ error: err.message || 'Failed to create payment order' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to create payment order. Please try again.' }, { status: 500 });
   }
 }
+

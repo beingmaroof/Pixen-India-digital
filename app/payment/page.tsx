@@ -7,6 +7,7 @@ import { DarkPageWrapper, FadeIn } from '@/components/DarkUI';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/lib/supabase';
 import { updateUserData, savePayment } from '@/lib/auth';
 import toast from 'react-hot-toast';
 
@@ -132,9 +133,22 @@ export default function PaymentPage() {
         return;
       }
 
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData?.session?.access_token;
+
+      if (!token) {
+        toast.error('Session expired. Please log in again.');
+        setIsProcessing(false);
+        router.push('/login');
+        return;
+      }
+
       const orderRes = await fetch('/api/razorpay/order', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({ plan: planId, userId: user?.id, email: userEmail }),
       });
 
@@ -162,7 +176,10 @@ export default function PaymentPage() {
         handler: async (response: { razorpay_payment_id: string; razorpay_order_id: string; razorpay_signature: string }) => {
           const verifyRes = await fetch('/api/razorpay/verify', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}` 
+            },
             body: JSON.stringify(response),
           });
 

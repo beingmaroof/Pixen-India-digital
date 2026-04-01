@@ -377,6 +377,14 @@ export default function ScrollStorySection({ onAuditClick }: ScrollStorySectionP
 
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [lerpFactor, setLerpFactor] = useState(LERP_FACTOR);
+
+  useEffect(() => {
+    // Reduce interpolation overhead on mobile devices
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      setLerpFactor(0.15); 
+    }
+  }, []);
 
   // Smooth lerp progress
   const targetProgressRef = useRef(0);
@@ -420,7 +428,7 @@ export default function ScrollStorySection({ onAuditClick }: ScrollStorySectionP
     const tick = () => {
       const target = targetProgressRef.current;
       const current = currentProgressRef.current;
-      const newCurrent = lerp(current, target, LERP_FACTOR);
+      const newCurrent = lerp(current, target, lerpFactor);
       currentProgressRef.current = newCurrent;
 
       setScrollProgress(newCurrent);
@@ -440,7 +448,7 @@ export default function ScrollStorySection({ onAuditClick }: ScrollStorySectionP
     };
 
     rafRef.current = requestAnimationFrame(tick);
-  }, [getFrameIndex, drawFrame]);
+  }, [getFrameIndex, drawFrame, lerpFactor]);
 
   // Preload images
   useEffect(() => {

@@ -105,10 +105,45 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     });
 
+    // Background silent refresh to prevent stale sessions
+    const refreshInterval = setInterval(async () => {
+      if (mounted) {
+        try {
+          const { data, error } = await supabase.auth.getSession();
+          if (error) console.error("Silent refresh error", error);
+        } catch (e) {
+          // ignore
+        }
+      }
+    }, 5 * 60 * 1000); // 5 minutes
+
+    // Refresh on focus (user comes back to tab)
+    const handleFocus = async () => {
+      if (mounted) {
+        try {
+          await supabase.auth.getSession();
+        } catch (e) {
+          // ignore
+        }
+      }
+    };
+    
+    if (typeof window !== 'undefined') {
+      window.addEventListener('focus', handleFocus);
+      window.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') handleFocus();
+      });
+    }
+
     return () => {
       mounted = false;
       subscription.unsubscribe();
       clearTimeout(timeout);
+      clearInterval(refreshInterval);
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('focus', handleFocus);
+        // visibilitychange is harder to cleanly remove an anonymous fn, but focus is key
+      }
     };
   }, []);
 

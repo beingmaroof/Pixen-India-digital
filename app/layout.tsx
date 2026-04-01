@@ -5,6 +5,7 @@ import Script from "next/script";
 import { AuthProvider } from '@/contexts/AuthContext';
 import FloatingSocialIcons from '@/components/FloatingSocialIcons';
 import CursorFollower from '@/components/CursorFollower';
+import ScrollToTop from '@/components/ScrollToTop';
 import { Toaster } from 'react-hot-toast';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import "./globals.css";
@@ -181,6 +182,7 @@ export default function RootLayout({
             instagramUrl="https://www.instagram.com/pixenindiadigital/"
             whatsappUrl="https://wa.me/917827717445"
           />
+          <ScrollToTop />
         </AuthProvider>
       </body>
     </html>
