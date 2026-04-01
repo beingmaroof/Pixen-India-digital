@@ -22,7 +22,7 @@ export async function middleware(request: NextRequest) {
   const projectRef = 'fwbiibjuxlmqsbufwelv';
   const authCookieName = `sb-${projectRef}-auth-token`;
   const cookies = request.cookies;
-  const authToken = cookies.get(authCookieName) || cookies.get('supabase-auth-token');
+  const authToken = cookies.get(authCookieName) || cookies.get('supabase-auth-token') || cookies.get('pixen-auth-token');
 
   if (!authToken) {
     // Redirect to login and preserve the original path

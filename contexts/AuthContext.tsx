@@ -59,6 +59,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         const { data } = await supabase.auth.getSession();
         if (data.session && mounted) {
+          document.cookie = `pixen-auth-token=true; path=/; max-age=604800; SameSite=Lax`;
           setSession(data.session);
           setUser(data.session.user);
           const uData = await getUserData(data.session.user.id);
@@ -85,6 +86,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(session?.user ?? null);
 
       if (event === 'SIGNED_OUT') {
+        document.cookie = `pixen-auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
         setUserData(null);
         setSession(null);
         setUser(null);
@@ -92,6 +94,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (session?.user) {
+        document.cookie = `pixen-auth-token=true; path=/; max-age=604800; SameSite=Lax`;
         try {
           if (event === 'SIGNED_IN') await new Promise(r => setTimeout(r, 500));
           const data = await getUserData(session.user.id);

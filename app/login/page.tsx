@@ -96,6 +96,8 @@ function LoginForm() {
             setErrorType('wrong_password');
             toast.error('Incorrect password');
           }
+          setLoading(false);
+          return;
         } else if (msg.toLowerCase().includes('email not confirmed')) {
           setErrors({ submit: 'Please verify your email address before logging in. Check your inbox for a confirmation email.' });
           setErrorType('general');
