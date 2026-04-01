@@ -459,6 +459,7 @@ export default function ScrollStorySection({ onAuditClick }: ScrollStorySectionP
       new Promise((resolve) => {
         const num = String(i + 1).padStart(3, '0');
         const img = new Image();
+        img.decoding = 'async'; // Prevents main thread blocking
         img.src = `/frames/ezgif-frame-${num}.jpg`;
         img.onload = () => {
           loadedRef.current[i] = true;
@@ -473,13 +474,13 @@ export default function ScrollStorySection({ onAuditClick }: ScrollStorySectionP
       });
 
     loadImage(0).then(() => {
-      // Small batch size + higher delay prevents network exhaustion (ERR_INSUFFICIENT_RESOURCES)
-      const batchSize = 4;
+      // Small batch size + higher delay prevents network exhaustion and OOM crashes
+      const batchSize = 2;
       const loadBatch = async (start: number) => {
         if (start >= TOTAL_FRAMES) return;
         const end = Math.min(start + batchSize, TOTAL_FRAMES);
         await Promise.all(Array.from({ length: end - start }, (_, j) => loadImage(start + j)));
-        setTimeout(() => loadBatch(end), 50);
+        setTimeout(() => loadBatch(end), 120);
       };
       loadBatch(1);
     });
@@ -583,15 +584,7 @@ export default function ScrollStorySection({ onAuditClick }: ScrollStorySectionP
           }}
         />
 
-        {/* Film grain overlay */}
-        <div
-          className="absolute inset-0 pointer-events-none mix-blend-screen opacity-[0.025]"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
-            backgroundRepeat: 'repeat',
-            backgroundSize: '256px 256px',
-          }}
-        />
+        {/* Film grain overlay removed to maximize FPS and prevent GPU lagging */}
 
         {/* Loading state */}
         {!isLoaded && (

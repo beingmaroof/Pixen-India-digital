@@ -199,13 +199,13 @@ export default function Home() {
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           {/* Primary purple orb */}
           <div className="orb-drift absolute -top-40 left-[18%] w-[700px] h-[700px] rounded-full"
-            style={{ background: 'radial-gradient(circle, rgba(168,85,247,0.22) 0%, transparent 70%)' }} />
+            style={{ background: 'radial-gradient(circle, rgba(168,85,247,0.22) 0%, transparent 70%)', transform: 'translateZ(0)', willChange: 'transform, opacity' }} />
           {/* Blue orb */}
           <div className="orb-drift-slow absolute -bottom-60 right-[10%] w-[600px] h-[600px] rounded-full"
-            style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.18) 0%, transparent 70%)' }} />
+            style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.18) 0%, transparent 70%)', transform: 'translateZ(0)', willChange: 'transform, opacity' }} />
           {/* Accent cyan micro-orb */}
           <div className="orb-drift absolute top-1/3 right-[30%] w-[300px] h-[300px] rounded-full"
-            style={{ background: 'radial-gradient(circle, rgba(0,214,255,0.06) 0%, transparent 70%)', animationDuration: '12s', animationDelay: '-4s' }} />
+            style={{ background: 'radial-gradient(circle, rgba(0,214,255,0.06) 0%, transparent 70%)', animationDuration: '12s', animationDelay: '-4s', transform: 'translateZ(0)', willChange: 'transform, opacity' }} />
           {/* Grid pattern */}
           <div className="absolute inset-0"
             style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)', backgroundSize: '80px 80px' }} />
