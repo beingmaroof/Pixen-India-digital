@@ -6,7 +6,6 @@ import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import AvatarMenu from './AvatarMenu';
 import { useAuth } from '@/contexts/AuthContext';
-import ThemeToggle from './ThemeToggle';
 
 const navLinks = [
   { href: '/#overview', label: 'Overview' },
@@ -106,7 +105,6 @@ export default function PremiumNavbar() {
                       Free Audit
                     </button>
                     <AvatarMenu />
-                    <ThemeToggle />
                   </>
                 ) : (
                   <>
