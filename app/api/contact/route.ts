@@ -53,7 +53,7 @@ export async function POST(req: Request) {
       name: sanitize(body.name).substring(0, 100),
       email: normalizeEmail(body.email).substring(0, 100),
       phone: sanitize(body.phone).substring(0, 20),
-      businessType: sanitize(body.businessType).substring(0, 100),
+      business_type: sanitize(body.businessType).substring(0, 100),
       budget: sanitize(body.budget).substring(0, 100),
       message: sanitize(body.message).substring(0, 2000),
       source: sanitize(body.source || 'contact_form').substring(0, 50),
