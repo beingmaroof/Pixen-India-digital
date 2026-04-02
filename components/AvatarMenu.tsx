@@ -28,18 +28,41 @@ export default function AvatarMenu() {
     setIsLoggingOut(true);
     setIsOpen(false);
 
+    const clearBrowserState = () => {
+      try {
+        if (typeof window !== 'undefined') {
+          const keysToRemove = [];
+          for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && (key.startsWith('sb-') || key.includes('auth-token'))) {
+              keysToRemove.push(key);
+            }
+          }
+          keysToRemove.forEach(key => localStorage.removeItem(key));
+          
+          document.cookie = 'pixen-auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+          document.cookie = 'supabase-auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        }
+      } catch (e) {
+        console.error('Error clearing browser state', e);
+      }
+    };
+
     // Fallback: force hard redirect after 4 seconds if Supabase hangs
     const fallbackTimer = setTimeout(() => {
+      clearBrowserState();
       window.location.href = '/login';
     }, 4000);
 
     try {
       await supabase.auth.signOut();
       clearTimeout(fallbackTimer);
+      clearBrowserState();
       toast.success('Signed out safely', { duration: 2000 });
     } catch (error) {
       console.error('Logout error:', error);
       clearTimeout(fallbackTimer);
+      clearBrowserState();
       toast.error('An error occurred during logout. Force clearing session...', { duration: 3000 });
     } finally {
       // Always hard-navigate to ensure session is cleared from UI
