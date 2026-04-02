@@ -38,8 +38,8 @@ export async function POST(req: Request) {
     ]);
 
     if (error && error.code === '42P01') { // 42P01 is undefined_table in postgres
-      console.warn("support_tickets table does not exist, falling back to contacts table");
-      const { error: fallbackError } = await supabase.from("contacts").insert([
+      console.warn("support_tickets table does not exist, falling back to leads table");
+      const { error: fallbackError } = await supabase.from("leads").insert([
         { 
           name: sanitize(body.name).substring(0, 100),
           email: normalizeEmail(body.email).substring(0, 100),

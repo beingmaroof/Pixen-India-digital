@@ -49,17 +49,15 @@ export async function POST(req: Request) {
     if (aiScore > 70) autoPriority = 'high';
     if (aiScore < 40) autoPriority = 'low';
 
-    const { error } = await supabase.from("contacts").insert([{
+    const { error } = await supabase.from("leads").insert([{
       name: sanitize(body.name).substring(0, 100),
       email: normalizeEmail(body.email).substring(0, 100),
       phone: sanitize(body.phone).substring(0, 20),
-      business_type: sanitize(body.businessType).substring(0, 100),
+      businessType: sanitize(body.businessType).substring(0, 100),
       budget: sanitize(body.budget).substring(0, 100),
-      message: sanitize(body.message).substring(0, 2000),
+      message: sanitize(body.message).substring(0, 2000) + `\n\n[AI Qual Score: ${aiScore} | Priority: ${autoPriority}]`,
       source: sanitize(body.source || 'contact_form').substring(0, 50),
-      status: 'new',
-      priority: autoPriority,
-      assigned_to: 'unassigned'
+      status: 'new'
     }]);
 
     if (error) {
