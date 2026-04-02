@@ -62,11 +62,16 @@ export const trackOutboundLink = (url: string, linkName: string) => {
 
 export const trackEvent = (eventName: string, params?: Record<string, any>) => {
   try {
+    const enrichedParams = {
+      ...params,
+      timestamp: new Date().toISOString(),
+      location: typeof window !== 'undefined' ? window.location.pathname : '',
+    };
     if (typeof window !== 'undefined' && window.gtag) {
-      window.gtag('event', eventName, params || {});
+      window.gtag('event', eventName, enrichedParams);
     }
     if (process.env.NODE_ENV === 'development') {
-      console.info(`[Analytics] ${eventName}`, params);
+      console.info(`[Analytics] ${eventName}`, enrichedParams);
     }
   } catch (error) {
     console.warn("Analytics tracking failed", error);

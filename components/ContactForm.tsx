@@ -4,26 +4,10 @@ import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 import { trackEvent } from '@/lib/analytics';
 import Link from 'next/link';
+import { useLeadStore } from '@/store/leadStore';
 
-interface FormData {
-  // Step 0
-  name: string;
-  email: string;
-  phone: string;
-  // Step 1
-  businessType: string;
-  budget: string;
-  // Step 2
-  message: string;
-  // Honeypot
-  website_url?: string;
-}
-
-const INITIAL: FormData = {
-  name: '', email: '', phone: '',
-  businessType: '', budget: '',
-  message: '', website_url: '',
-};
+// Honeypot locally stored
+const INITIAL_HONEYPOT = '';
 
 /* ───────────────────── constants ─────────────────────── */
 const BUSINESS_TYPES = [
@@ -91,13 +75,20 @@ const selectClass = `${inputClass} cursor-pointer`;
 
 export default function ContactForm() {
   const [step, setStep] = useState(0);
-  const [form, setForm] = useState<FormData>(INITIAL);
+  const formState = useLeadStore();
+  const [honeypot, setHoneypot] = useState(INITIAL_HONEYPOT);
+
+  const form = { ...formState, website_url: honeypot };
+  
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
 
   /* helpers */
-  const set = (field: keyof FormData, value: any) => setForm(f => ({ ...f, [field]: value }));
+  const set = (field: string, value: any) => {
+    if (field === 'website_url') setHoneypot(value);
+    else formState.updateField(field as any, value);
+  };
 
   /* validation per step */
   const validate = (): boolean => {
@@ -119,6 +110,19 @@ export default function ContactForm() {
       if (!form.message.trim() || form.message.trim().length < 10) e.message = 'Please describe your request (min 10 chars)';
     }
     setErrors(e);
+
+    // Auto-scroll to first error
+    if (Object.keys(e).length > 0) {
+      setTimeout(() => {
+        const firstErrorField = Object.keys(e)[0];
+        const element = document.getElementsByName(firstErrorField)[0] as HTMLElement;
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          element.focus();
+        }
+      }, 50);
+    }
+
     return Object.keys(e).length === 0;
   };
 
@@ -152,10 +156,12 @@ export default function ContactForm() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               to: form.email,
+              phone: form.phone,
               name: form.name,
               type: 'contact_confirmation',
             }),
           }).catch(() => {});
+          formState.resetForm();
           setStep(3); // Go to success
         } else {
           const err = await response.json().catch(() => ({}));
@@ -196,19 +202,19 @@ export default function ContactForm() {
               <div className="space-y-5">
                 <div>
                   <label className={labelClass}>Full Name *</label>
-                  <input value={form.name} onChange={e => set('name', e.target.value)} className={inputClass} placeholder="e.g. Arjun Kumar" autoFocus />
+                  <input name="name" value={form.name} onChange={e => set('name', e.target.value)} className={inputClass} placeholder="e.g. Arjun Kumar" autoFocus />
                   {errors.name && <p className="mt-1.5 text-xs text-red-400">{errors.name}</p>}
                 </div>
                 <div>
                   <label className={labelClass}>Business Email *</label>
-                  <input type="email" value={form.email} onChange={e => set('email', e.target.value)} className={inputClass} placeholder="rahul@yourbusiness.com" />
+                  <input name="email" type="email" value={form.email} onChange={e => set('email', e.target.value)} className={inputClass} placeholder="rahul@yourbusiness.com" />
                   {errors.email && <p className="mt-1.5 text-xs text-red-400">{errors.email}</p>}
                 </div>
                 <div>
                   <label className={labelClass}>WhatsApp Number</label>
                   <div className="relative">
                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 font-medium">+91</span>
-                    <input type="tel" value={form.phone} onChange={e => set('phone', e.target.value)} className={`${inputClass} pl-12`} placeholder="98765 43210" />
+                    <input name="phone" type="tel" value={form.phone} onChange={e => set('phone', e.target.value)} className={`${inputClass} pl-12`} placeholder="98765 43210" />
                   </div>
                   {errors.phone && <p className="mt-1.5 text-xs text-red-400">{errors.phone}</p>}
                 </div>
@@ -224,7 +230,7 @@ export default function ContactForm() {
               <div className="space-y-6">
                 <div>
                   <label className={labelClass}>Business Type *</label>
-                  <select value={form.businessType} onChange={e => set('businessType', e.target.value)} className={selectClass} autoFocus>
+                  <select name="businessType" value={form.businessType} onChange={e => set('businessType', e.target.value)} className={selectClass} autoFocus>
                     <option value="" className="bg-gray-900">Select your business type</option>
                     {BUSINESS_TYPES.map(t => <option key={t} value={t} className="bg-gray-900">{t}</option>)}
                   </select>
@@ -232,7 +238,7 @@ export default function ContactForm() {
                 </div>
                 <div>
                   <label className={labelClass}>Monthly Marketing Budget *</label>
-                  <select value={form.budget} onChange={e => set('budget', e.target.value)} className={selectClass}>
+                  <select name="budget" value={form.budget} onChange={e => set('budget', e.target.value)} className={selectClass}>
                     <option value="" className="bg-gray-900">Select your budget range</option>
                     {BUDGET_RANGES.map(b => <option key={b} value={b} className="bg-gray-900">{b}</option>)}
                   </select>
@@ -254,6 +260,7 @@ export default function ContactForm() {
                 <div>
                   <label className={labelClass}>Your Message / Challenge *</label>
                   <textarea
+                    name="message"
                     value={form.message} onChange={e => set('message', e.target.value)} rows={5}
                     className={`${inputClass} resize-none`} autoFocus
                     placeholder="We get traffic but very few leads convert. Looking to scale..."
@@ -306,7 +313,7 @@ export default function ContactForm() {
                   Explore Client Results
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                 </Link>
-                <button onClick={() => { setStep(0); setForm(INITIAL); }} className="text-white/30 hover:text-white/70 text-sm transition-colors mt-2">
+                <button type="button" onClick={() => { setStep(0); setHoneypot(INITIAL_HONEYPOT); }} className="text-white/30 hover:text-white/70 text-sm transition-colors mt-2">
                   Submit another request
                 </button>
               </div>

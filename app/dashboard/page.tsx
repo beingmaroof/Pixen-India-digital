@@ -7,6 +7,7 @@ import { DarkPageWrapper } from '@/components/DarkUI';
 import PremiumNavbar from '@/components/PremiumNavbar';
 import { Footer } from '@/components';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/lib/supabase';
 
 export default function DashboardPage() {
   const { isAuthenticated, user, userData } = useAuth();
@@ -101,14 +102,23 @@ function DashboardContent({ isAuthenticated, user, userData, router }: any) {
   const searchParams = useSearchParams();
   const showWelcome = searchParams.get('success') === 'true';
   const [isWelcomeModalOpen, setIsWelcomeModalOpen] = useState(false);
+  const [latestLead, setLatestLead] = useState<any>(null);
 
   useEffect(() => {
     if (showWelcome) {
       setIsWelcomeModalOpen(true);
-      // Clean up the URL quietly 
       window.history.replaceState({}, '', '/dashboard');
     }
   }, [showWelcome]);
+
+  useEffect(() => {
+    if (user?.email) {
+      supabase.from('leads').select('*').eq('email', user.email).order('created_at', { ascending: false }).limit(1)
+        .then(({ data }) => {
+          if (data && data.length > 0) setLatestLead(data[0]);
+        });
+    }
+  }, [user]);
 
   if (!isAuthenticated) {
     return (
@@ -258,34 +268,40 @@ function DashboardContent({ isAuthenticated, user, userData, router }: any) {
                 </div>
               </div>
 
-              {/* Campaign widget (blurred) */}
+              {/* Campaign widget (live tracking) */}
               <div className="rounded-2xl border border-white/10 bg-white/5 p-7 relative overflow-hidden">
-                <div className="absolute inset-0 backdrop-blur-[2px] z-20 flex flex-col items-center justify-center rounded-2xl">
-                  <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center mb-4">
-                    <svg className="w-6 h-6 text-purple-400 animate-spin" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                    </svg>
-                  </div>
-                  <h3 className="text-lg font-bold text-white">Awaiting Ad Data Connection</h3>
-                  <p className="text-sm text-white/40 mt-1 max-w-sm text-center">Metrics will appear once we connect your Meta and Google Ad accounts.</p>
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-lg font-bold text-white">Your Growth Audit Progress</h3>
+                  <span className="text-xs text-white/40 flex items-center gap-1">
+                    <svg className="w-3 h-3 text-green-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" /></svg>
+                    Last updated {latestLead ? new Date(latestLead.created_at).toLocaleDateString() : 'Today'}
+                  </span>
                 </div>
-                <div className="opacity-30 pointer-events-none">
-                  <h3 className="text-lg font-bold text-white mb-4">Campaign Performance</h3>
-                  <div className="grid grid-cols-3 gap-3 mb-4">
-                    {['₹14,500', '₹240', '64'].map((v, i) => (
-                      <div key={i} className="rounded-xl border border-white/10 bg-white/5 p-4">
-                        <div className="text-xs text-white/40 mb-1">{['Total Spends', 'Cost/Lead', 'Total Leads'][i]}</div>
-                        <div className="text-2xl font-bold text-white">{v}</div>
-                      </div>
-                    ))}
+                
+                {latestLead ? (
+                  <div className="flex flex-col items-center justify-center py-6">
+                    <div className="w-16 h-16 rounded-full bg-purple-500/20 flex items-center justify-center mb-4 ring-4 ring-purple-500/10">
+                      <svg className="w-8 h-8 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    </div>
+                    <h4 className="text-xl font-bold text-white mb-2">Audit Received</h4>
+                    <p className="text-sm text-white/50 text-center max-w-sm mb-6">Our strategists are currently reviewing your details for <span className="font-semibold text-white/70">{latestLead.business_type}</span>. We will assign a specialist shortly.</p>
+                    <div className="flex gap-2">
+                       <span className="px-3 py-1 bg-white/10 rounded border border-white/5 text-xs text-white/60">Status: {latestLead.status || 'In Queue'}</span>
+                       <span className="px-3 py-1 bg-white/10 rounded border border-white/5 text-xs text-white/60">Priority: {latestLead.priority || 'Standard'}</span>
+                    </div>
                   </div>
-                  <div className="w-full h-28 rounded-xl bg-white/5 flex items-end gap-2 p-4">
-                    {[33,66,50,75,100,85].map((h, i) => (
-                      <div key={i} className="flex-1 rounded-t-md bg-gradient-to-t from-purple-600/50 to-blue-500/50" style={{ height: `${h}%` }} />
-                    ))}
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-6 opacity-60">
+                    <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center mb-4">
+                      <svg className="w-6 h-6 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    </div>
+                    <h3 className="text-lg font-bold text-white mb-1">No Audit Found</h3>
+                    <p className="text-sm text-white/40 max-w-sm text-center">It looks like you haven't requested a growth audit yet. Get started to ignite your pipeline.</p>
+                    <button onClick={() => router.push('/audit')} className="mt-4 px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-500 rounded-lg text-xs font-bold text-white hover:opacity-90">
+                       Request Audit Now
+                    </button>
                   </div>
-                </div>
+                )}
               </div>
             </div>
 

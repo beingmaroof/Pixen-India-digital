@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
+import { validateOrigin, isRateLimited } from '@/lib/security';
 
 interface EmailBody {
   to: string;
+  phone?: string;
   name: string;
   planName: string;
   planPrice: string;
@@ -113,12 +115,27 @@ function getEmailContent(type: EmailBody['type'], name: string, planName?: strin
 
 export async function POST(req: Request) {
   try {
+    if (!validateOrigin(req)) {
+      return NextResponse.json({ error: 'Unauthorized CSRF' }, { status: 403 });
+    }
+    const rateLimit = isRateLimited(req, '/api/send-confirmation', 5, 60000);
+    if (!rateLimit.success) {
+      return NextResponse.json({ success: false, error: 'Too many requests', errorCode: 'RATE_LIMIT_EXCEEDED', retryAfter: rateLimit.retryAfter }, { status: 429 });
+    }
+
     const body: EmailBody = await req.json();
-    const { to, name, planName, planPrice, type } = body;
+    const { to, phone, name, planName, planPrice, type } = body;
 
     if (!to || !name || !type) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
+
+    // --- MOCK SMS/WHATSAPP CONFIRMATION ---
+    if (phone) {
+      console.info(`[MOCK WHATSAPP/SMS] Triggered confirmation to ${phone} for ${type}`);
+      // In production: await twilioClient.messages.create({ body: `Hi ${name}...`, to: phone, ... })
+    }
+    // --------------------------------------
 
     const emailUser = process.env.EMAIL_USER;
     const emailPass = process.env.EMAIL_PASS;

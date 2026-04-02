@@ -3,7 +3,9 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import PremiumNavbar from '@/components/PremiumNavbar';
-import { Footer } from '@/components';
+import dynamic from 'next/dynamic';
+
+const Footer = dynamic(() => import('@/components/Footer'));
 import { DarkPageWrapper } from '@/components/DarkUI';
 import { supabase } from '@/lib/supabase';
 
@@ -159,6 +161,19 @@ export default function AuditPage() {
     const timeout = new Promise<void>((resolve) => setTimeout(resolve, 10000));
     try {
       await Promise.race([savePromise, timeout]);
+      
+      // Passively trigger backend mock Audit generation
+      fetch('/api/generate-audit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: form.email,
+          businessType: form.businessType,
+          goals: form.goals,
+          revenue: form.revenue
+        })
+      }).catch(err => console.warn('Audit trigger background failure:', err));
+      
     } catch (err) {
       // Silently continue — user still sees the scheduling page
       console.error('Lead save error:', err);

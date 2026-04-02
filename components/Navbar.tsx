@@ -155,7 +155,7 @@ export default function Navbar() {
         </div>
 
         {isMobileMenuOpen && (
-          <div id="mobile-menu" className="md:hidden py-6 border-t border-white/20 animate-fade-in">
+          <div id="mobile-menu" className="md:hidden py-6 border-t border-white/20 animate-fade-in max-h-[calc(100vh-80px)] overflow-y-auto">
             <div className="flex flex-col space-y-4">
               {navLinks.map((link) => {
                 const isActive =

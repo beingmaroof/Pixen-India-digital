@@ -13,13 +13,17 @@ import toast from 'react-hot-toast';
 import { trackEvent } from '@/lib/analytics';
 
 // ─── Check email existence + provider via secure server-side API ──────────────
-async function checkEmailProvider(email: string): Promise<{ exists: boolean; provider: 'google' | 'email' | 'other' | null }> {
+async function checkEmailProvider(email: string): Promise<{ exists: boolean; provider: 'google' | 'email' | 'other' | null; rateLimited?: boolean; retryAfter?: number }> {
   try {
     const res = await fetch('/api/check-email-provider', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: email.toLowerCase().trim() }),
     });
+    if (res.status === 429) {
+      const json = await res.json();
+      return { exists: false, provider: null, rateLimited: true, retryAfter: json.retryAfter || 60 };
+    }
     if (!res.ok) return { exists: false, provider: null };
     return await res.json();
   } catch {
@@ -41,6 +45,17 @@ function LoginForm() {
   const [rememberMe, setRememberMe] = useState(false);
   // 'general' | 'wrong_password' | 'no_account' | 'google_account'
   const [errorType, setErrorType] = useState<string>('general');
+  const [rateLimitCountdown, setRateLimitCountdown] = useState<number>(0);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (rateLimitCountdown > 0) {
+      timer = setInterval(() => {
+        setRateLimitCountdown(prev => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [rateLimitCountdown]);
 
   useEffect(() => {
     const handlePageShow = (event: PageTransitionEvent) => {
@@ -81,9 +96,14 @@ function LoginForm() {
 
         if (isInvalidCredentials) {
           // Step 2: Use server API to detect if email exists + which provider
-          const { exists, provider } = await checkEmailProvider(formData.email);
+          const { exists, provider, rateLimited, retryAfter } = await checkEmailProvider(formData.email);
 
-          if (!exists) {
+          if (rateLimited) {
+            setRateLimitCountdown(retryAfter || 60);
+            setErrors({ submit: `Too many login attempts. Please wait ${retryAfter || 60} seconds.` });
+            setErrorType('general');
+            toast.error('Too many attempts.');
+          } else if (!exists) {
             // Email is completely unknown to our auth system
             setErrors({ submit: `No account found for "${formData.email}". Would you like to create one?` });
             setErrorType('no_account');
@@ -103,7 +123,8 @@ function LoginForm() {
           setErrorType('general');
           toast.error('Email not confirmed');
         } else if (msg.toLowerCase().includes('too many requests') || msg.toLowerCase().includes('rate limit')) {
-          setErrors({ submit: 'Too many login attempts. Please wait a moment and try again.' });
+          setRateLimitCountdown(60);
+          setErrors({ submit: 'Too many login attempts. Please wait 60 seconds.' });
           setErrorType('general');
           toast.error('Too many attempts. Please try later.');
         } else {
@@ -234,7 +255,7 @@ function LoginForm() {
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             error={errors.email}
-            autoComplete="email"
+            autoComplete="off"
           />
           <AuthInput
             id="password"
@@ -245,7 +266,7 @@ function LoginForm() {
             onChange={(e) => setFormData({ ...formData, password: e.target.value })}
             error={errors.password}
             showPasswordToggle
-            autoComplete="current-password"
+            autoComplete="new-password"
           />
 
           <div className="flex items-center justify-between">
@@ -265,13 +286,13 @@ function LoginForm() {
 
           <button
             type="submit"
-            disabled={loading || isSocialLoading}
+            disabled={loading || isSocialLoading || rateLimitCountdown > 0}
             className="w-full relative py-3 rounded-xl font-semibold text-white overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/30 disabled:opacity-60"
           >
             <span className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-500" />
             <span className="relative flex items-center justify-center gap-2">
               {loading ? <span className="w-5 h-5 rounded-full border-2 border-white/30 border-t-white animate-spin" /> : null}
-              {loading ? 'Signing In…' : 'Sign In'}
+              {rateLimitCountdown > 0 ? `Wait ${rateLimitCountdown}s` : loading ? 'Signing In…' : 'Sign In'}
             </span>
           </button>
         </form>

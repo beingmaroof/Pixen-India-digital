@@ -34,12 +34,14 @@ export default function AvatarMenu() {
           const keysToRemove = [];
           for (let i = 0; i < localStorage.length; i++) {
             const key = localStorage.key(i);
-            if (key && (key.startsWith('sb-') || key.includes('auth-token'))) {
+            if (key && (key.startsWith('sb-') || key.includes('auth-token') || key.includes('email') || key.includes('password'))) {
               keysToRemove.push(key);
             }
           }
           keysToRemove.forEach(key => localStorage.removeItem(key));
           
+          sessionStorage.clear(); // Wipe sensitive session-based form inputs
+
           document.cookie = 'pixen-auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
           document.cookie = 'supabase-auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
         }

@@ -1,8 +1,17 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase-admin';
+import { validateOrigin, isRateLimited } from '@/lib/security';
 
 export async function POST(request: Request) {
   try {
+    if (!validateOrigin(request)) {
+      return NextResponse.json({ error: "Unauthorized source" }, { status: 403 });
+    }
+
+    const rateLimit = isRateLimited(request, '/api/check-email-provider', 5, 60000);
+    if (!rateLimit.success) {
+      return NextResponse.json({ success: false, error: "Too many login attempts. Please wait.", errorCode: "RATE_LIMIT_EXCEEDED", retryAfter: rateLimit.retryAfter }, { status: 429 });
+    }
     const { email } = await request.json();
 
     if (!email || typeof email !== 'string') {

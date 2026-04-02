@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { validateOrigin, isRateLimited, isBotHoneypot } from "@/lib/security";
+import { sanitize, normalizeEmail } from "@/lib/sanitizer";
 
 export async function POST(req: Request) {
   try {
@@ -8,9 +9,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized source" }, { status: 403 });
     }
 
-    if (isRateLimited(req, 10, 60000)) { // 10 requests per minute
+    const rateLimit = isRateLimited(req, '/api/contact', 10, 60000);
+    if (!rateLimit.success) {
       console.warn("Rate limit exceeded for contact form");
-      return NextResponse.json({ error: "Too many requests. Please try again later." }, { status: 429 });
+      return NextResponse.json({ success: false, error: "Too many requests. Please try again later.", errorCode: "RATE_LIMIT_EXCEEDED", retryAfter: rateLimit.retryAfter }, { status: 429 });
     }
 
     const body = await req.json();
@@ -32,14 +34,32 @@ export async function POST(req: Request) {
     const { createClient } = await import("@supabase/supabase-js");
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    // AI Smart Lead Qualification
+    const budgetRaw = String(body.budget || '');
+    let aiScore = 50;
+    if (budgetRaw.includes('3,00,000') || budgetRaw.includes('Above')) aiScore += 30;
+    if (budgetRaw.includes('Below ₹50,000')) aiScore -= 20;
+    
+    // Message insight
+    const msg = String(body.message || '');
+    if (msg.length > 50) aiScore += 10;
+    if (msg.toLowerCase().includes('scale') || msg.toLowerCase().includes('growth')) aiScore += 10;
+
+    let autoPriority = 'medium';
+    if (aiScore > 70) autoPriority = 'high';
+    if (aiScore < 40) autoPriority = 'low';
+
     const { error } = await supabase.from("contacts").insert([{
-      name: body.name,
-      email: body.email,
-      phone: body.phone,
-      businessType: body.businessType,
-      budget: body.budget,
-      message: body.message,
-      source: body.source || 'contact_form'
+      name: sanitize(body.name).substring(0, 100),
+      email: normalizeEmail(body.email).substring(0, 100),
+      phone: sanitize(body.phone).substring(0, 20),
+      businessType: sanitize(body.businessType).substring(0, 100),
+      budget: sanitize(body.budget).substring(0, 100),
+      message: sanitize(body.message).substring(0, 2000),
+      source: sanitize(body.source || 'contact_form').substring(0, 50),
+      status: 'new',
+      priority: autoPriority,
+      assigned_to: 'unassigned'
     }]);
 
     if (error) {
@@ -53,10 +73,12 @@ export async function POST(req: Request) {
       email: body.email,
       name: body.name,
       timestamp: new Date().toISOString(),
-      source: body.source || 'contact_form'
+      source: body.source || 'contact_form',
+      aiScore,
+      priority: autoPriority
     });
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, ai_qualification_score: aiScore });
   } catch (err: any) {
     console.error('API Error:', err);
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });

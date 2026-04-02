@@ -23,6 +23,7 @@ interface UserData {
   location?: string;
   active_plan?: string;
   plan_status?: string;
+  role?: string;
 }
 
 interface AuthContextType {
@@ -49,6 +50,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let mounted = true;
+
+    // Cross-tab sync setup
+    const authChannel = typeof window !== 'undefined' ? new BroadcastChannel('pixen_auth_sync') : null;
+    if (authChannel) {
+      authChannel.onmessage = (event) => {
+        if (event.data === 'FORCE_LOGOUT' && mounted) {
+          document.cookie = `pixen-auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+          setSession(null);
+          setUser(null);
+          setUserData(null);
+          window.location.href = '/login';
+        }
+      };
+    }
+
+    // Fallback storage event
+    const handleStorage = (event: StorageEvent) => {
+      if ((event.key === 'supabase.auth.token' || event.key === 'sb-auth-token') && (!event.newValue) && mounted) {
+        if (authChannel) authChannel.postMessage('FORCE_LOGOUT');
+        document.cookie = `pixen-auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+        setSession(null);
+        setUser(null);
+        setUserData(null);
+      }
+    };
+    if (typeof window !== 'undefined') {
+      window.addEventListener('storage', handleStorage);
+    }
 
     // Safety timeout: never stay stuck on loading for more than 5 seconds
     const timeout = setTimeout(() => {
@@ -90,6 +119,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUserData(null);
         setSession(null);
         setUser(null);
+        if (authChannel) authChannel.postMessage('FORCE_LOGOUT');
         return;
       }
 
@@ -145,7 +175,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       clearInterval(refreshInterval);
       if (typeof window !== 'undefined') {
         window.removeEventListener('focus', handleFocus);
-        // visibilitychange is harder to cleanly remove an anonymous fn, but focus is key
+        window.removeEventListener('storage', handleStorage);
+        if (authChannel) authChannel.close();
       }
     };
   }, []);
