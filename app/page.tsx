@@ -222,7 +222,7 @@ export default function Home() {
             <FadeIn delay={0.15}>
               <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-bold leading-[1.04] tracking-tight">
                 <span className="block text-white">We Build</span>
-                <span className="block text-shimmer" style={{ animationDelay: '0.5s' }}>
+                <span className="block text-shimmer pb-3 -mb-3" style={{ animationDelay: '0.5s' }}>
                   Revenue-Generating
                 </span>
                 <span className="block text-white">Growth Systems</span>

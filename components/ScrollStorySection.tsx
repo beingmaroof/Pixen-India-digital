@@ -236,7 +236,7 @@ function StageOverlay({
           {stage.heading.map((line, i) => (
             <span
               key={i}
-              className="block"
+              className="block pb-3 -mb-3"
               style={{
                 background:
                   i === 0

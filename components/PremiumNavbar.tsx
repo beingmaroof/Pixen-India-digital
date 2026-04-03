@@ -43,14 +43,15 @@ export default function PremiumNavbar() {
 
   return (
     <>
-      <nav
-        className={`fixed w-full top-0 z-50 transition-all duration-500 ${
-          scrolled
-            ? 'bg-black/60 backdrop-blur-2xl border-b border-white/10 shadow-2xl shadow-black/40'
-            : 'bg-transparent border-b border-transparent'
-        }`}
-      >
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+      <nav className="fixed w-full top-0 z-50">
+        <div 
+          className={`absolute inset-0 pointer-events-none transition-all duration-500 border-b ${
+            scrolled 
+              ? 'bg-black/60 backdrop-blur-2xl border-white/10 shadow-2xl shadow-black/40 opacity-100' 
+              : 'bg-transparent border-transparent opacity-0'
+          }`}
+        />
+        <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 lg:h-18">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2.5 group flex-shrink-0">
