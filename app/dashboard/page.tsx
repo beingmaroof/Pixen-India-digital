@@ -112,13 +112,45 @@ function DashboardContent({ isAuthenticated, user, userData, router }: any) {
   }, [showWelcome]);
 
   useEffect(() => {
-    if (user?.email) {
-      supabase.from('leads').select('*').eq('email', user.email).order('created_at', { ascending: false }).limit(1)
-        .then(({ data }) => {
-          if (data && data.length > 0) setLatestLead(data[0]);
+    let active = true;
+
+    const fetchLatestLead = async () => {
+      if (!user?.email) {
+        if (active) setLatestLead(null);
+        return;
+      }
+
+      try {
+        const { data } = await supabase.auth.getSession();
+        const token = data.session?.access_token;
+        const response = await fetch('/api/dashboard/lead', {
+          headers: token
+            ? {
+                Authorization: `Bearer ${token}`,
+              }
+            : {},
+          cache: 'no-store',
         });
-    }
-  }, [user]);
+
+        if (!response.ok) {
+          throw new Error('Unable to load lead data.');
+        }
+
+        const json = await response.json();
+        if (active) {
+          setLatestLead(json.lead ? { ...json.lead, bookings: json.bookings || [] } : null);
+        }
+      } catch {
+        if (active) setLatestLead(null);
+      }
+    };
+
+    fetchLatestLead();
+
+    return () => {
+      active = false;
+    };
+  }, [user?.email]);
 
   if (!isAuthenticated) {
     return (
@@ -167,11 +199,22 @@ function DashboardContent({ isAuthenticated, user, userData, router }: any) {
   const activePlan = userData?.active_plan || null;
   const isPlanActive = userData?.plan_status === 'active';
   const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+  const confirmedBooking =
+    latestLead?.bookings?.find((booking: any) => booking.booking_status === 'confirmed') ||
+    (latestLead?.booked_slot_at
+      ? {
+          starts_at: latestLead.booked_slot_at,
+          timezone: 'Asia/Calcutta',
+        }
+      : null);
+  const hasReportReady = Boolean(latestLead?.report_url);
+  const hasConfirmedBooking = Boolean(confirmedBooking);
 
   const quickLinks = [
     { title: 'Account Profile', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z', href: '/profile' },
     { title: 'Upgrade Plan', icon: 'M13 10V3L4 14h7v7l9-11h-7z', href: '/pricing' },
     { title: 'Support Tickets', icon: 'M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z', href: '/support' },
+    { title: 'ROI Calculator', icon: 'M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3 1.343 3 3-1.343 3-3 3m0-16V3m0 18v-2m9-8h-2M5 11H3m15.364-6.364l-1.414 1.414M7.05 17.95l-1.414 1.414m0-13.9l1.414 1.414m11.314 11.314l1.414 1.414', href: '/tools/roi-calculator' },
   ];
 
   const steps = [
@@ -279,15 +322,91 @@ function DashboardContent({ isAuthenticated, user, userData, router }: any) {
                 </div>
                 
                 {latestLead ? (
-                  <div className="flex flex-col items-center justify-center py-6">
-                    <div className="w-16 h-16 rounded-full bg-purple-500/20 flex items-center justify-center mb-4 ring-4 ring-purple-500/10">
-                      <svg className="w-8 h-8 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  <div className="py-4">
+                    <div className="mb-5 flex items-center justify-between gap-4">
+                      <div className={`flex h-14 w-14 items-center justify-center rounded-full ring-4 ${
+                        hasConfirmedBooking
+                          ? 'bg-green-500/20 ring-green-500/10'
+                          : hasReportReady
+                          ? 'bg-purple-500/20 ring-purple-500/10'
+                          : 'bg-blue-500/20 ring-blue-500/10'
+                      }`}>
+                        <svg className={`h-7 w-7 ${
+                          hasConfirmedBooking ? 'text-green-300' : hasReportReady ? 'text-purple-300' : 'text-blue-300'
+                        }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-white/60">
+                          Stage: {latestLead.stage || latestLead.status || 'submitted'}
+                        </span>
+                        <span className="rounded-full bg-white/10 px-3 py-1 text-xs capitalize text-white/60">
+                          Audit: {latestLead.audit_status || 'submitted'}
+                        </span>
+                        <span className="rounded-full bg-white/10 px-3 py-1 text-xs capitalize text-white/60">
+                          {latestLead.lead_temperature || 'warm'} lead
+                        </span>
+                      </div>
                     </div>
-                    <h4 className="text-xl font-bold text-white mb-2">Audit Received</h4>
-                    <p className="text-sm text-white/50 text-center max-w-sm mb-6">Our strategists are currently reviewing your details for <span className="font-semibold text-white/70">{latestLead.business_type}</span>. We will assign a specialist shortly.</p>
-                    <div className="flex gap-2">
-                       <span className="px-3 py-1 bg-white/10 rounded border border-white/5 text-xs text-white/60">Status: {latestLead.status || 'In Queue'}</span>
-                       <span className="px-3 py-1 bg-white/10 rounded border border-white/5 text-xs text-white/60">Priority: {latestLead.priority || 'Standard'}</span>
+
+                    <h4 className="text-xl font-bold text-white mb-2">
+                      {hasConfirmedBooking
+                        ? 'Strategy Call Confirmed'
+                        : hasReportReady
+                        ? 'Audit Report Ready'
+                        : 'Audit In Review'}
+                    </h4>
+                    <p className="max-w-xl text-sm leading-relaxed text-white/50">
+                      {hasConfirmedBooking
+                        ? `Your strategy call is booked for ${new Date(confirmedBooking.starts_at).toLocaleString('en-IN', {
+                            dateStyle: 'medium',
+                            timeStyle: 'short',
+                          })}. Use the report to prep for the conversation and keep the recommendations handy.`
+                        : hasReportReady
+                        ? `Your audit for ${latestLead.business_type || latestLead.businessType || 'your business'} is ready. Review the report, then lock in a live strategy slot when you are ready.`
+                        : `Our strategists are reviewing your details for ${latestLead.business_type || latestLead.businessType || 'your business'}. Your follow-up sequence is ${latestLead.follow_up_sequence || 'active'}.`}
+                    </p>
+
+                    <div className="mt-6 grid grid-cols-1 gap-3 md:grid-cols-3">
+                      <div className="rounded-2xl border border-white/10 bg-[#050815] px-4 py-4">
+                        <p className="text-xs uppercase tracking-wider text-white/30 mb-1">Lead Score</p>
+                        <p className="text-2xl font-bold text-white">{latestLead.lead_score || 0}</p>
+                      </div>
+                      <div className="rounded-2xl border border-white/10 bg-[#050815] px-4 py-4">
+                        <p className="text-xs uppercase tracking-wider text-white/30 mb-1">Next Follow-up</p>
+                        <p className="text-sm font-semibold text-white">
+                          {latestLead.next_follow_up_at
+                            ? new Date(latestLead.next_follow_up_at).toLocaleString('en-IN', {
+                                dateStyle: 'medium',
+                                timeStyle: 'short',
+                              })
+                            : 'Not scheduled'}
+                        </p>
+                      </div>
+                      <div className="rounded-2xl border border-white/10 bg-[#050815] px-4 py-4">
+                        <p className="text-xs uppercase tracking-wider text-white/30 mb-1">Follow-up Flow</p>
+                        <p className="text-sm font-semibold capitalize text-white">
+                          {latestLead.follow_up_sequence?.replace(/_/g, ' ') || 'Standard nurture'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                      {latestLead.report_url && (
+                        <Link
+                          href={latestLead.report_url}
+                          className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-purple-600 to-blue-500 px-5 py-3 text-sm font-bold text-white transition-all hover:shadow-lg hover:shadow-purple-500/25"
+                        >
+                          Open Audit Report
+                        </Link>
+                      )}
+                      <button
+                        onClick={() => router.push(latestLead.report_url || '/audit')}
+                        className="inline-flex items-center justify-center rounded-xl border border-white/10 px-5 py-3 text-sm font-semibold text-white/75 transition-all hover:border-white/20 hover:bg-white/5 hover:text-white"
+                      >
+                        {hasConfirmedBooking ? 'Manage Booking' : hasReportReady ? 'Book Strategy Call' : 'Request Another Audit'}
+                      </button>
                     </div>
                   </div>
                 ) : (

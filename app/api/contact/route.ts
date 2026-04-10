@@ -1,25 +1,22 @@
-import { NextResponse } from "next/server";
-import { validateOrigin, isRateLimited, isBotHoneypot } from "@/lib/security";
-import { sanitize, normalizeEmail } from "@/lib/sanitizer";
+import { NextResponse } from 'next/server';
+import { buildLeadWorkflow } from '@/lib/lead-workflow';
+import { validateOrigin, isRateLimited, isBotHoneypot } from '@/lib/security';
+import { sanitize, normalizeEmail } from '@/lib/sanitizer';
 
 export async function POST(req: Request) {
   try {
     if (!validateOrigin(req)) {
-      console.warn("CSRF blocked cross-origin request to /api/contact");
-      return NextResponse.json({ error: "Unauthorized source" }, { status: 403 });
+      return NextResponse.json({ error: 'Unauthorized source' }, { status: 403 });
     }
 
     const rateLimit = isRateLimited(req, '/api/contact', 10, 60000);
     if (!rateLimit.success) {
-      console.warn("Rate limit exceeded for contact form");
-      return NextResponse.json({ success: false, error: "Too many requests. Please try again later.", errorCode: "RATE_LIMIT_EXCEEDED", retryAfter: rateLimit.retryAfter }, { status: 429 });
+      return NextResponse.json({ success: false, error: 'Too many requests. Please try again later.', errorCode: 'RATE_LIMIT_EXCEEDED', retryAfter: rateLimit.retryAfter }, { status: 429 });
     }
 
     const body = await req.json();
 
     if (isBotHoneypot(body)) {
-      console.warn("Honeypot triggered on contact form");
-      // Silently pretend it worked to trick the bot
       return NextResponse.json({ success: true });
     }
 
@@ -28,57 +25,69 @@ export async function POST(req: Request) {
 
     if (!supabaseUrl || !supabaseKey) {
       console.error('Missing Supabase env vars in /api/contact');
-      return NextResponse.json({ error: "Service configuration error" }, { status: 500 });
+      return NextResponse.json({ error: 'Service configuration error' }, { status: 500 });
     }
 
-    const { createClient } = await import("@supabase/supabase-js");
+    const { createClient } = await import('@supabase/supabase-js');
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // AI Smart Lead Qualification
-    const budgetRaw = String(body.budget || '');
-    let aiScore = 50;
-    if (budgetRaw.includes('3,00,000') || budgetRaw.includes('Above')) aiScore += 30;
-    if (budgetRaw.includes('Below ₹50,000')) aiScore -= 20;
-    
-    // Message insight
-    const msg = String(body.message || '');
-    if (msg.length > 50) aiScore += 10;
-    if (msg.toLowerCase().includes('scale') || msg.toLowerCase().includes('growth')) aiScore += 10;
+    const workflow = buildLeadWorkflow({
+      source: String(body.source || 'contact_form'),
+      businessType: String(body.businessType || ''),
+      budget: String(body.budget || ''),
+      message: String(body.message || ''),
+      website: String(body.website || ''),
+    });
+    const aiScore = workflow.score;
+    const autoPriority = workflow.priorityLabel;
 
-    let autoPriority = 'medium';
-    if (aiScore > 70) autoPriority = 'high';
-    if (aiScore < 40) autoPriority = 'low';
-
-    const { error } = await supabase.from("leads").insert([{
+    const { error } = await supabase.from('leads').insert([{
       name: sanitize(body.name).substring(0, 100),
       email: normalizeEmail(body.email).substring(0, 100),
       phone: sanitize(body.phone).substring(0, 20),
+      website: sanitize(body.website || '').substring(0, 200),
       businessType: sanitize(body.businessType).substring(0, 100),
       budget: sanitize(body.budget).substring(0, 100),
-      message: sanitize(body.message).substring(0, 2000) + `\n\n[AI Qual Score: ${aiScore} | Priority: ${autoPriority}]`,
+      message: sanitize(body.message).substring(0, 2000),
       source: sanitize(body.source || 'contact_form').substring(0, 50),
-      status: 'new'
+      status: workflow.stage,
+      stage: workflow.stage,
+      audit_status: workflow.auditStatus,
+      lead_score: workflow.score,
+      lead_temperature: workflow.temperature,
+      follow_up_sequence: workflow.followUpSequence,
+      next_follow_up_at: workflow.nextFollowUpAt,
+      utm_source: sanitize(body.utm_source || '').substring(0, 100),
+      utm_medium: sanitize(body.utm_medium || '').substring(0, 100),
+      utm_campaign: sanitize(body.utm_campaign || '').substring(0, 100),
     }]);
 
     if (error) {
       console.error('Supabase Insert Error:', error);
       // Masking db errors from frontend
-      return NextResponse.json({ error: "Failed to process request. Please try again later." }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to process request. Please try again later.' }, { status: 500 });
     }
 
     // Structured server-side logging for perfect analytics reliability
-    console.info("lead_created", {
+    console.info('lead_created', {
       email: body.email,
       name: body.name,
       timestamp: new Date().toISOString(),
       source: body.source || 'contact_form',
       aiScore,
-      priority: autoPriority
+      priority: autoPriority,
+      temperature: workflow.temperature,
     });
 
-    return NextResponse.json({ success: true, ai_qualification_score: aiScore });
+    return NextResponse.json({
+      success: true,
+      ai_qualification_score: aiScore,
+      lead_temperature: workflow.temperature,
+      follow_up_sequence: workflow.followUpSequence,
+    });
   } catch (err: any) {
     console.error('API Error:', err);
-    return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
+    return NextResponse.json({ error: 'An unexpected error occurred.' }, { status: 500 });
   }
 }

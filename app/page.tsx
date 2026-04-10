@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, useInView } from 'framer-motion';
 import dynamic from 'next/dynamic';
+import { CaseStudyRecord, seedCaseStudies, seedTestimonials, TestimonialRecord } from '@/lib/content-seed';
 
 const ScrollStorySection = dynamic(() => import('@/components/ScrollStorySection'), {
   loading: () => (
@@ -181,8 +182,55 @@ const testimonials = [
   { initials: 'RS', name: 'Rajesh Sharma', role: 'CEO, TechStart Solutions', quote: "We were struggling to scale our inbound pipeline. Pixen audited our site, fixed our funnels, and increased lead volume by 340% in under 90 days.", metric: '+340% Leads', color: 'from-purple-700 to-blue-700' },
 ];
 
+function toManagedHomeCaseStudy(study: CaseStudyRecord) {
+  return {
+    slug: study.slug,
+    industry: study.industry,
+    title: study.title,
+    metric: study.results[0]?.value || study.duration,
+    metricLabel: study.results[0]?.metric || 'Result',
+    summary: study.summary,
+  };
+}
+
+const defaultHomeCaseStudies = seedCaseStudies.map(toManagedHomeCaseStudy);
+const defaultHomeTestimonials = seedTestimonials as TestimonialRecord[];
+
 export default function Home() {
   const router = useRouter();
+  const [managedCaseStudies, setManagedCaseStudies] = useState(defaultHomeCaseStudies);
+  const [managedTestimonials, setManagedTestimonials] = useState(defaultHomeTestimonials);
+
+  useEffect(() => {
+    let active = true;
+
+    const loadManagedContent = async () => {
+      try {
+        const response = await fetch('/api/content', { cache: 'no-store' });
+        if (!response.ok) return;
+
+        const json = await response.json();
+
+        if (!active) return;
+
+        if (Array.isArray(json.caseStudies) && json.caseStudies.length > 0) {
+          setManagedCaseStudies(json.caseStudies.slice(0, 3).map(toManagedHomeCaseStudy));
+        }
+
+        if (Array.isArray(json.testimonials) && json.testimonials.length > 0) {
+          setManagedTestimonials(json.testimonials.slice(0, 3));
+        }
+      } catch {
+        // Keep the visual fallback content if managed content is unavailable.
+      }
+    };
+
+    loadManagedContent();
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const openAudit = () => {
     track('cta_click', { label: 'get_free_audit' });
@@ -265,10 +313,10 @@ export default function Home() {
                   </button>
                 </div>
                 <button
-                  onClick={() => document.getElementById('case-studies')?.scrollIntoView({ behavior: 'smooth' })}
+                  onClick={() => router.push('/tools/roi-calculator')}
                   className="px-8 py-4 rounded-full font-semibold text-white/70 border border-white/15 hover:bg-white/5 hover:text-white hover:border-white/30 transition-all duration-300"
                 >
-                  See Client Results
+                  Estimate ROI
                 </button>
               </div>
             </FadeIn>
@@ -406,7 +454,7 @@ export default function Home() {
             </h2>
           </FadeIn>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {caseStudies.map((cs, i) => (
+            {managedCaseStudies.map((cs, i) => (
               <FadeIn key={i} delay={i * 0.1}>
                 <GlassCard className="flex flex-col h-full relative overflow-hidden">
                   {/* Top glow line */}
@@ -433,6 +481,20 @@ export default function Home() {
               </FadeIn>
             ))}
           </div>
+          <div className="mt-10 flex flex-col items-center justify-center gap-3 text-center sm:flex-row">
+            <Link
+              href="/industries"
+              className="inline-flex items-center justify-center rounded-full border border-white/15 px-6 py-3 text-sm font-semibold text-white/75 transition-all duration-300 hover:border-white/30 hover:bg-white/5 hover:text-white"
+            >
+              Explore Industry Playbooks
+            </Link>
+            <Link
+              href="/tools/roi-calculator"
+              className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-purple-600 to-blue-500 px-6 py-3 text-sm font-bold text-white transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/20"
+            >
+              Use ROI Calculator
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -446,14 +508,16 @@ export default function Home() {
             </h2>
           </FadeIn>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
-            {/* Connector line — aligned to center of w-20 (80px) icon = top-10 */}
-            <div className="hidden md:block absolute top-10 left-[16%] right-[16%] h-px bg-gradient-to-r from-purple-500/0 via-purple-500/40 to-purple-500/0" />
+            {/* Connector line segment 1: Step 1 → Step 2 */}
+            <div className="hidden md:block absolute top-10 left-[16%] right-[50%] h-px z-0 bg-gradient-to-r from-purple-500/0 to-purple-500/40" />
+            {/* Connector line segment 2: Step 2 → Step 3 */}
+            <div className="hidden md:block absolute top-10 left-[50%] right-[16%] h-px z-0 bg-gradient-to-l from-purple-500/0 to-purple-500/40" />
             {[
               { num: '01', title: 'Free Growth Audit', desc: 'We analyze your funnel, ads, competitors, and opportunities. You get a detailed roadmap in 48 hours — zero fluff.', icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg> },
               { num: '02', title: 'Custom Growth Strategy', desc: 'We build a channel-specific 90-day growth plan — paid media, content, SEO, CRO — with clear KPIs and revenue targets.', icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg> },
               { num: '03', title: 'Execute & Scale', desc: 'We launch, test, and iterate rapidly. Weekly calls, transparent reporting, and a dedicated team focused on one goal: your revenue.', icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg> },
             ].map((step, i) => (
-              <FadeIn key={i} delay={i * 0.15}>
+              <FadeIn key={i} delay={i * 0.15} className="relative z-10">
                 <div className="flex flex-col items-center text-center">
                   <div className="relative w-20 h-20 rounded-2xl flex items-center justify-center text-white mb-6 border border-white/10 bg-white/5">
                     <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-purple-500/20 to-blue-500/10" />
@@ -493,7 +557,7 @@ export default function Home() {
             </h2>
           </FadeIn>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {testimonials.map((t, i) => (
+            {managedTestimonials.map((t, i) => (
               <FadeIn key={i} delay={i * 0.1}>
                 <GlassCard className="flex flex-col h-full">
                   {/* Stars */}

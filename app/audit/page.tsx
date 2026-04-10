@@ -7,7 +7,6 @@ import dynamic from 'next/dynamic';
 
 const Footer = dynamic(() => import('@/components/Footer'));
 import { DarkPageWrapper } from '@/components/DarkUI';
-import { supabase } from '@/lib/supabase';
 
 /* ───────────────────────── types ───────────────────────── */
 interface FormData {
@@ -15,6 +14,7 @@ interface FormData {
   name: string;
   email: string;
   phone: string;
+  website: string;
   // Step 2
   businessType: string;
   revenue: string;
@@ -27,7 +27,7 @@ interface FormData {
 }
 
 const INITIAL: FormData = {
-  name: '', email: '', phone: '',
+  name: '', email: '', phone: '', website: '',
   businessType: '', revenue: '', channels: [],
   goals: [], customGoal: '', budget: '', timeline: '',
 };
@@ -108,7 +108,7 @@ export default function AuditPage() {
   const [form, setForm] = useState<FormData>(INITIAL);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  const [submissionError, setSubmissionError] = useState('');
 
   /* helpers */
   const set = (field: keyof FormData, value: any) => setForm(f => ({ ...f, [field]: value }));
@@ -145,52 +145,47 @@ export default function AuditPage() {
 
   const saveLead = async () => {
     // Wrap in a 10-second timeout so a slow/failed DB call never blocks the user
-    const savePromise = supabase.from('leads').insert([{
-      name: form.name,
-      email: form.email,
-      phone: form.phone,
-      business_type: form.businessType,
-      revenue_range: form.revenue,
-      current_channels: form.channels,
-      goals: form.goals.concat(form.customGoal ? [form.customGoal] : []),
-      budget_range: form.budget,
-      timeline: form.timeline,
-      source: 'audit_form',
-      created_at: new Date().toISOString(),
-    }]);
-    const timeout = new Promise<void>((resolve) => setTimeout(resolve, 10000));
-    try {
-      await Promise.race([savePromise, timeout]);
+    const savePromise = fetch('/api/audit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(form),
+    });
+    const timeout = new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Audit request timed out.')), 10000));
+    const response = await Promise.race([savePromise, timeout]);
+    const json = await response.json();
       
-      // Passively trigger backend mock Audit generation
-      fetch('/api/generate-audit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: form.email,
-          businessType: form.businessType,
-          goals: form.goals,
-          revenue: form.revenue
-        })
-      }).catch(err => console.warn('Audit trigger background failure:', err));
-      
-    } catch (err) {
-      // Silently continue — user still sees the scheduling page
-      console.error('Lead save error:', err);
+    if (!response.ok) {
+      throw new Error(json.error || 'Unable to generate your audit.');
     }
+    return json;
+      // Silently continue — user still sees the scheduling page
   };
 
   const handleNext = async () => {
     if (!validate()) return;
     if (step === 2) {
       setSubmitting(true);
+      setSubmissionError('');
       try {
-        await saveLead();
+        const audit = await saveLead();
+        fetch('/api/send-confirmation', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            to: form.email,
+            phone: form.phone,
+            name: form.name,
+            type: 'audit_report_ready',
+            reportUrl: audit.reportUrl,
+          }),
+        }).catch(() => {});
+        router.push(audit.reportUrl || `/reports/${audit.reportId}`);
+        return;
+      } catch (error: any) {
+        setSubmissionError(error?.message || 'Unable to generate your audit.');
       } finally {
         // Always advance — never leave user stuck on submitting state
         setSubmitting(false);
-        setSubmitted(true);
-        setStep(3);
       }
       return; // step already set above
     }
@@ -266,6 +261,11 @@ export default function AuditPage() {
                     <label className={labelClass}>Phone Number *</label>
                     <input type="tel" value={form.phone} onChange={e => set('phone', e.target.value)} className={inputClass} placeholder="+91 98765 43210" />
                     {errors.phone && <p className="mt-1.5 text-xs text-red-400">{errors.phone}</p>}
+                  </div>
+                  <div>
+                    <label className={labelClass}>Website URL</label>
+                    <input value={form.website} onChange={e => set('website', e.target.value)} className={inputClass} placeholder="https://yourwebsite.com" />
+                    <p className="mt-1.5 text-xs text-white/30">Optional, but it helps us tailor the audit and report.</p>
                   </div>
                 </div>
               </div>
@@ -419,6 +419,12 @@ export default function AuditPage() {
                   className="text-white/40 hover:text-white/70 text-sm transition-colors underline underline-offset-2">
                   Return to homepage
                 </button>
+              </div>
+            )}
+
+            {submissionError && step < 3 && (
+              <div className="mt-8 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+                {submissionError}
               </div>
             )}
 

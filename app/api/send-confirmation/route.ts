@@ -6,14 +6,23 @@ interface EmailBody {
   to: string;
   phone?: string;
   name: string;
-  planName: string;
-  planPrice: string;
-  type: 'payment_confirmation' | 'contact_confirmation' | 'support_confirmation';
+  planName?: string;
+  planPrice?: string;
+  reportUrl?: string;
+  bookingStartsAt?: string;
+  type: 'payment_confirmation' | 'contact_confirmation' | 'support_confirmation' | 'audit_report_ready' | 'audit_booking_confirmation';
 }
 
 const BRAND_COLOR = '#4F46E5';
 
-function getEmailContent(type: EmailBody['type'], name: string, planName?: string, planPrice?: string): { subject: string; html: string } {
+function getEmailContent(
+  type: EmailBody['type'],
+  name: string,
+  planName?: string,
+  planPrice?: string,
+  reportUrl?: string,
+  bookingStartsAt?: string
+): { subject: string; html: string } {
   if (type === 'payment_confirmation') {
     return {
       subject: `🎉 Welcome to Pixen India — ${planName} Activated!`,
@@ -87,6 +96,61 @@ function getEmailContent(type: EmailBody['type'], name: string, planName?: strin
     };
   }
 
+  if (type === 'audit_report_ready') {
+    return {
+      subject: 'Your Pixen growth audit is ready',
+      html: `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
+          <div style="background: linear-gradient(135deg, ${BRAND_COLOR}, #6366f1); padding: 40px 32px; border-radius: 16px 16px 0 0; text-align: center;">
+            <h1 style="color: #ffffff; font-size: 28px; font-weight: 800; margin: 0 0 8px 0;">Your Audit Is Ready</h1>
+            <p style="color: rgba(255,255,255,0.85); font-size: 16px; margin: 0;">Review the report and book your strategy call.</p>
+          </div>
+          <div style="padding: 40px 32px;">
+            <p style="font-size: 16px; color: #374151; margin: 0 0 16px 0;">Hi <strong>${name}</strong>,</p>
+            <p style="font-size: 16px; color: #374151; line-height: 1.6; margin: 0 0 24px 0;">
+              We translated your answers into a structured growth audit with action priorities, scorecards, and next steps.
+            </p>
+            <div style="text-align: center; margin: 0 0 28px 0;">
+              <a href="${reportUrl || 'https://pixenindia.com/audit'}" style="display: inline-block; background: linear-gradient(135deg, ${BRAND_COLOR}, #6366f1); color: white; font-weight: 700; font-size: 16px; padding: 14px 32px; border-radius: 10px; text-decoration: none;">
+                Open Audit Report
+              </a>
+            </div>
+            <p style="font-size: 14px; color: #6b7280; line-height: 1.6;">
+              Once you review it, pick a strategy-call slot directly from the report page so we can prioritize the fastest wins together.
+            </p>
+          </div>
+        </div>
+      `,
+    };
+  }
+
+  if (type === 'audit_booking_confirmation') {
+    return {
+      subject: 'Your Pixen strategy call is confirmed',
+      html: `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
+          <div style="background: linear-gradient(135deg, #059669, #10b981); padding: 40px 32px; border-radius: 16px 16px 0 0; text-align: center;">
+            <h1 style="color: #ffffff; font-size: 28px; font-weight: 800; margin: 0 0 8px 0;">Strategy Call Confirmed</h1>
+            <p style="color: rgba(255,255,255,0.85); font-size: 16px; margin: 0;">We are looking forward to meeting you.</p>
+          </div>
+          <div style="padding: 40px 32px;">
+            <p style="font-size: 16px; color: #374151; margin: 0 0 16px 0;">Hi <strong>${name}</strong>,</p>
+            <p style="font-size: 16px; color: #374151; line-height: 1.6; margin: 0 0 18px 0;">
+              Your strategy call has been booked successfully.
+            </p>
+            <div style="background: #f3f4f6; border-radius: 12px; padding: 18px 20px; margin: 0 0 24px 0;">
+              <p style="font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #6b7280; margin: 0 0 8px 0;">Scheduled Time</p>
+              <p style="font-size: 18px; font-weight: 700; color: #111827; margin: 0;">${bookingStartsAt ? new Date(bookingStartsAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : 'Your selected slot'}</p>
+            </div>
+            <p style="font-size: 14px; color: #6b7280; line-height: 1.6;">
+              Please keep your audit report open during the call. If anything changes, reply to this email or WhatsApp us at +91 78277 17445.
+            </p>
+          </div>
+        </div>
+      `,
+    };
+  }
+
   // support_confirmation
   return {
     subject: '🛠️ Support request received — Pixen India',
@@ -124,7 +188,7 @@ export async function POST(req: Request) {
     }
 
     const body: EmailBody = await req.json();
-    const { to, phone, name, planName, planPrice, type } = body;
+    const { to, phone, name, planName, planPrice, type, reportUrl, bookingStartsAt } = body;
 
     if (!to || !name || !type) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -151,7 +215,7 @@ export async function POST(req: Request) {
       auth: { user: emailUser, pass: emailPass },
     });
 
-    const { subject, html } = getEmailContent(type, name, planName, planPrice);
+    const { subject, html } = getEmailContent(type, name, planName, planPrice, reportUrl, bookingStartsAt);
 
     // Send confirmation to user
     await transporter.sendMail({
@@ -162,12 +226,12 @@ export async function POST(req: Request) {
     });
 
     // Notify internal team
-    if (type === 'payment_confirmation' || type === 'contact_confirmation') {
+    if (type === 'payment_confirmation' || type === 'contact_confirmation' || type === 'audit_report_ready' || type === 'audit_booking_confirmation') {
       await transporter.sendMail({
         from: `"Pixen India Notifications" <${emailUser}>`,
         to: 'Pixenindiadigital@gmail.com',
         subject: `[${type === 'payment_confirmation' ? 'NEW PAYMENT' : 'NEW LEAD'}] ${name} — ${planName || 'Audit Request'}`,
-        html: `<p>New ${type === 'payment_confirmation' ? 'payment' : 'lead'} from <strong>${name}</strong> (${to}). Plan: ${planName || 'N/A'}.</p>`,
+        html: `<p><strong>${name}</strong> (${to}) triggered <strong>${type}</strong>.</p><p>Plan: ${planName || 'N/A'}</p><p>Report: ${reportUrl || 'N/A'}</p><p>Booking: ${bookingStartsAt || 'N/A'}</p>`,
       });
     }
 
