@@ -8,6 +8,7 @@ import { DarkPageWrapper, DarkHero, DarkSection, DarkCard, DarkGradientBtn, Dark
 
 const services = [
   {
+    id: 'growth-systems',
     title: 'Growth Systems & Revenue Scaling',
     problem: 'Are you burning cash on ads that generate clicks but no qualified leads or sales?',
     solution: 'We deploy omni-channel paid strategies (Meta, Google, YouTube) backed by rigorous funnel optimization to ensure every penny spent returns maximum ROI.',
@@ -17,6 +18,7 @@ const services = [
     points: ['Meta, Google & YouTube Ads', 'Funnel Engineering & CRO', 'Revenue Attribution Tracking'],
   },
   {
+    id: 'content-strategy',
     title: 'Content That Converts',
     problem: "Your creatives aren't hooking viewers or convincing them why your brand is the clear choice?",
     solution: 'From high-retention video editing to scroll-stopping visual design, we architect content that tells a compelling story and drives immediate action.',
@@ -26,6 +28,7 @@ const services = [
     points: ['Strategic Content Creation', 'High-Retention Video Editing', 'Brand Identity Design'],
   },
   {
+    id: 'audience-building',
     title: 'Engaged Audiences & Authority',
     problem: 'Struggling to build a loyal community or command authority in a crowded market?',
     solution: 'Complete social media strategy, personal branding PR, and authentic influencer collaborations designed to make your brand the undisputed market leader.',
@@ -35,6 +38,7 @@ const services = [
     points: ['Social Media Strategy & Management', 'Performance Influencer Collaborations', 'Personal Branding & PR'],
   },
   {
+    id: 'digital-architecture',
     title: 'Digital Architecture & Strategy',
     problem: 'Do you have traffic but an underperforming website and a lack of clear strategic direction?',
     solution: 'We run deep CRO audits, rebuild broken user journeys, and provide high-level business consultancy to map your exact scaling path.',
@@ -62,7 +66,8 @@ export default function ServicesPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {services.map((svc, i) => (
             <FadeIn key={i} delay={i * 0.1}>
-              <DarkCard className="flex flex-col h-full">
+              <div id={svc.id}>
+                <DarkCard className="flex flex-col h-full">
                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-5 text-white ${svc.color === 'purple' ? 'bg-gradient-to-br from-purple-600 to-purple-800' : 'bg-gradient-to-br from-blue-600 to-blue-800'}`}>
                   {svc.icon}
                 </div>
@@ -92,6 +97,7 @@ export default function ServicesPage() {
                   Get Free Audit
                 </DarkGradientBtn>
               </DarkCard>
+              </div>
             </FadeIn>
           ))}
         </div>

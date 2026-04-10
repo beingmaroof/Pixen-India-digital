@@ -9,12 +9,19 @@ import {
   DarkSection,
 } from '@/components/DarkUI';
 import { getManagedCaseStudies } from '@/lib/content-service';
+import { seedCaseStudies } from '@/lib/content-seed';
 
 export async function generateStaticParams() {
-  const caseStudies = await getManagedCaseStudies();
-  return caseStudies.map((study) => ({
-    slug: study.slug,
-  }));
+  try {
+    const caseStudies = await getManagedCaseStudies();
+    if (caseStudies && caseStudies.length > 0) {
+      return caseStudies.map((study) => ({ slug: study.slug }));
+    }
+  } catch {
+    // fall through to seed
+  }
+  // Always guarantee seed slugs are statically generated
+  return seedCaseStudies.map((study) => ({ slug: study.slug }));
 }
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {

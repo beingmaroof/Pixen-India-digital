@@ -115,7 +115,7 @@ export default function Navbar() {
                 <div className="flex items-center gap-3">
                   <Link href="/login">
                     <span className="text-gray-700 hover:text-primary-600 font-semibold transition-colors">
-                      Sign In
+                      Client Login
                     </span>
                   </Link>
                   <Button
@@ -208,7 +208,7 @@ export default function Navbar() {
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="text-white/90 hover:text-white font-medium py-3 px-4 rounded-lg hover:bg-white/10 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2"
                   >
-                    Sign In
+                    Client Login
                   </Link>
                   <Button
                     variant="primary"

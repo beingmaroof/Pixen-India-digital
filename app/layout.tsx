@@ -67,8 +67,14 @@ export const metadata: Metadata = {
     canonical: siteUrl,
   },
   icons: {
-    icon: '/favicon.ico',
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/logo.png', type: 'image/png', sizes: '512x512' },
+    ],
+    apple: '/apple-touch-icon.png',
+    shortcut: '/logo.png',
   },
+  manifest: '/site.webmanifest',
 };
 
 const organizationSchema = {
@@ -105,7 +111,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="icon" href="/favicon.ico" type="image/x-icon" sizes="any" />
+        <link rel="icon" href="/logo.png" type="image/png" />
         
         {/* Google Analytics */}
         {process.env.NEXT_PUBLIC_GA_ID && (

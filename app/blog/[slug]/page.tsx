@@ -5,6 +5,7 @@ import { Footer } from '@/components';
 import LinkCtaBanner from '@/components/LinkCtaBanner';
 import { DarkBadge, DarkPageWrapper, DarkSection } from '@/components/DarkUI';
 import { getManagedBlogPosts } from '@/lib/content-service';
+import { seedBlogPosts } from '@/lib/content-seed';
 
 function formatPublishedAt(value: string) {
   return new Date(value).toLocaleDateString('en-US', {
@@ -15,10 +16,16 @@ function formatPublishedAt(value: string) {
 }
 
 export async function generateStaticParams() {
-  const posts = await getManagedBlogPosts();
-  return posts.map((post) => ({
-    slug: post.slug,
-  }));
+  try {
+    const posts = await getManagedBlogPosts();
+    if (posts && posts.length > 0) {
+      return posts.map((post) => ({ slug: post.slug }));
+    }
+  } catch {
+    // fall through to seed
+  }
+  // Always guarantee seed slugs are statically generated
+  return seedBlogPosts.map((post) => ({ slug: post.slug }));
 }
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {

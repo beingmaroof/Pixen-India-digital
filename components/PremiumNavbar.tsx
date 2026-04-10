@@ -110,7 +110,7 @@ export default function PremiumNavbar() {
                 ) : (
                   <>
                     <Link href="/login" className="text-sm font-medium text-white/60 hover:text-white transition-colors">
-                      Sign In
+                      Client Login
                     </Link>
                     <button
                       onClick={handleGetAudit}
@@ -163,7 +163,7 @@ export default function PremiumNavbar() {
             )}
             {isMounted && !loading && !isAuthenticated && (
               <Link href="/login" onClick={() => setMobileOpen(false)} className="text-center text-white/60 hover:text-white transition-colors font-medium py-2">
-                Sign In
+                Client Login
               </Link>
             )}
             {isMounted && !loading && isAuthenticated && <AvatarMenu />}

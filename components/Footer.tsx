@@ -8,10 +8,10 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   const serviceLinks = [
-    { href: '/services', label: 'Growth Systems & Revenue' },
-    { href: '/services', label: 'Content That Converts' },
-    { href: '/services', label: 'Engaged Audiences & Authority' },
-    { href: '/services', label: 'Digital Architecture' },
+    { href: '/services#growth-systems', label: 'Growth Systems & Revenue' },
+    { href: '/services#content-strategy', label: 'Content That Converts' },
+    { href: '/services#audience-building', label: 'Engaged Audiences & Authority' },
+    { href: '/services#digital-architecture', label: 'Digital Architecture' },
   ];
 
   const companyLinks = [

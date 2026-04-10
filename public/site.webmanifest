@@ -1,0 +1,13 @@
+{
+  "name": "Pixen India Digital",
+  "short_name": "Pixen",
+  "description": "Performance-driven digital growth agency",
+  "icons": [
+    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "/favicon.ico", "sizes": "32x32", "type": "image/x-icon" }
+  ],
+  "theme_color": "#7C3AED",
+  "background_color": "#02030A",
+  "display": "standalone",
+  "start_url": "/"
+}

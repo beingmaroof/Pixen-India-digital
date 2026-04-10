@@ -2,11 +2,43 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
 import PremiumNavbar from '@/components/PremiumNavbar';
 import { Footer } from '@/components';
-import { DarkPageWrapper, DarkHero, DarkSection, DarkGradientBtn, DarkCTABanner, FadeIn, DarkSectionHeader } from '@/components/DarkUI';
+import { DarkPageWrapper, DarkHero, DarkSection, DarkCTABanner, FadeIn, DarkSectionHeader } from '@/components/DarkUI';
 import Link from 'next/link';
+
+const CALENDLY_LINKS = {
+  starter: 'https://calendly.com/pixenindiadigital/starter-onboarding',
+  growth: 'https://calendly.com/pixenindiadigital/growth-onboarding',
+  premium: 'https://calendly.com/pixenindiadigital/premium-strategy-call',
+};
+
+const PLAN_VALUES = { starter: 49999, growth: 99999, premium: 199999 };
+
+function PricingCTA({ plan, label }: { plan: 'starter' | 'growth' | 'premium'; label: string }) {
+  const handleClick = () => {
+    window.open(CALENDLY_LINKS[plan], '_blank');
+    (window as any).gtag?.('event', 'pricing_cta_click', {
+      plan,
+      value: PLAN_VALUES[plan],
+      currency: 'INR',
+    });
+    (window as any).fbq?.('track', 'InitiateCheckout', {
+      content_name: plan,
+      value: PLAN_VALUES[plan],
+      currency: 'INR',
+    });
+  };
+  return (
+    <button
+      onClick={handleClick}
+      className="w-full relative overflow-hidden rounded-full py-3 px-6 font-bold text-white text-sm transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/30 hover:-translate-y-0.5 active:scale-95"
+      style={{ background: 'linear-gradient(135deg, #7C3AED 0%, #3B82F6 100%)' }}
+    >
+      {label}
+    </button>
+  );
+}
 
 const plans = [
   {
@@ -44,13 +76,6 @@ const faqs = [
 
 export default function PricingPage() {
   const router = useRouter();
-  const { isAuthenticated } = useAuth();
-
-  const handlePurchase = (planName: string) => {
-    const targetUrl = `/payment?plan=${encodeURIComponent(planName.toLowerCase())}`;
-    if (isAuthenticated) router.push(targetUrl);
-    else router.push(`/login?redirect=${encodeURIComponent(targetUrl)}`);
-  };
 
   return (
     <DarkPageWrapper>
@@ -109,9 +134,10 @@ export default function PricingPage() {
                 </ul>
 
                 {/* CTA */}
-                <DarkGradientBtn onClick={() => handlePurchase(plan.name)} className="w-full">
-                  {plan.name === 'Premium' ? 'Contact Us' : `Get ${plan.name}`}
-                </DarkGradientBtn>
+                <PricingCTA
+                  plan={plan.name.toLowerCase() as 'starter' | 'growth' | 'premium'}
+                  label={plan.name === 'Premium' ? 'Book Strategy Call' : plan.name === 'Growth' ? 'Get Growth — Book Onboarding Call' : 'Get Starter — Book Onboarding Call'}
+                />
               </div>
             </FadeIn>
           ))}
