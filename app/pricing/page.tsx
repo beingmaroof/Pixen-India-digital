@@ -7,17 +7,11 @@ import { Footer } from '@/components';
 import { DarkPageWrapper, DarkHero, DarkSection, DarkCTABanner, FadeIn, DarkSectionHeader } from '@/components/DarkUI';
 import Link from 'next/link';
 
-const CALENDLY_LINKS = {
-  starter: 'https://calendly.com/pixenindiadigital/starter-onboarding',
-  growth: 'https://calendly.com/pixenindiadigital/growth-onboarding',
-  premium: 'https://calendly.com/pixenindiadigital/premium-strategy-call',
-};
-
 const PLAN_VALUES = { starter: 49999, growth: 99999, premium: 199999 };
 
 function PricingCTA({ plan, label }: { plan: 'starter' | 'growth' | 'premium'; label: string }) {
+  const router = useRouter();
   const handleClick = () => {
-    window.open(CALENDLY_LINKS[plan], '_blank');
     (window as any).gtag?.('event', 'pricing_cta_click', {
       plan,
       value: PLAN_VALUES[plan],
@@ -28,6 +22,7 @@ function PricingCTA({ plan, label }: { plan: 'starter' | 'growth' | 'premium'; l
       value: PLAN_VALUES[plan],
       currency: 'INR',
     });
+    router.push(`/payment?plan=${plan}`);
   };
   return (
     <button
@@ -136,7 +131,7 @@ export default function PricingPage() {
                 {/* CTA */}
                 <PricingCTA
                   plan={plan.name.toLowerCase() as 'starter' | 'growth' | 'premium'}
-                  label={plan.name === 'Premium' ? 'Book Strategy Call' : plan.name === 'Growth' ? 'Get Growth — Book Onboarding Call' : 'Get Starter — Book Onboarding Call'}
+                  label={plan.name === 'Premium' ? 'Go Premium — Pay Now' : plan.name === 'Growth' ? 'Start Growing — Pay Now' : 'Get Started — Pay Now'}
                 />
               </div>
             </FadeIn>

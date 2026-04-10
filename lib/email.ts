@@ -74,7 +74,7 @@ export async function sendConfirmationEmail(userData: {
               </p>
               
               <div style="text-align: center; margin-top: 30px;">
-                <a href="https://calendly.com/pixenindia/free-consultation" class="button">Book a Free Strategy Call</a>
+                <a href="https://pixenindia.com/pricing" class="button">View Our Plans & Get Started</a>
               </div>
               
               <p style="margin-top: 30px;">Looking forward to helping your business grow!</p>
@@ -109,7 +109,7 @@ export async function sendConfirmationEmail(userData: {
       Email: Pixenindiadigital@gmail.com
       Phone: +91 78277 17445
 
-      Book a Free Strategy Call: https://calendly.com/pixenindia/free-consultation
+      View our plans & get started: https://pixenindia.com/pricing
 
       Looking forward to helping your business grow!
 
