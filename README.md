@@ -1,169 +1,341 @@
-# Pixen India Digital Website
+# Pixen India Digital
 
-**Performance-Driven Digital Growth Agency**
+![Status](https://img.shields.io/badge/Status-Active-success)
+![Version](https://img.shields.io/badge/Version-1.0-blue)
+![License](https://img.shields.io/badge/License-All%20Rights%20Reserved-red)
+![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178C6?logo=typescript)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss)
+![Supabase](https://img.shields.io/badge/Supabase-Backend-3ECF8E?logo=supabase)
+![Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?logo=vercel)
 
-## 🚀 Phase 0: Project Setup - COMPLETE
+Pixen India Digital is a modern digital growth agency platform built to help businesses strengthen their online presence, generate quality leads, and scale through data-driven marketing solutions. The website combines a premium user experience with modern web technologies to create a fast, secure, and conversion-focused platform.
 
-This is the base setup for the Pixen India Digital website following the development plan.
-
----
-
-## 📋 Tech Stack
-
-- **Frontend:** Next.js 14 (App Router)
-- **Styling:** Tailwind CSS
-- **Backend:** Next.js API routes (Phase 5)
-- **Database:** Firebase Firestore (Phase 5)
-- **Hosting:** Vercel (Phase 8)
+The project is designed not just as a company website but as a complete client acquisition and management system where businesses can discover services, request consultations, submit project requirements, and manage their interactions through a secure dashboard.
 
 ---
 
-## 🛠️ Installation Instructions
+# 🌐 Live Demo
 
-### Step 1: Install Dependencies
+**Website:** https://pixenindiadigital.vercel.app
 
-Open your terminal in the project folder and run:
+---
+
+# 📖 About The Project
+
+Pixen India Digital was built with the goal of creating a professional digital agency website that reflects trust, innovation, and modern design.
+
+Instead of using a traditional contact page, the platform focuses on understanding each client's business before scheduling a consultation. Visitors can provide detailed information about their company, goals, budget, and project requirements, allowing the agency to prepare meaningful discussions rather than generic sales calls.
+
+The project also emphasizes performance, responsive design, authentication, security, and a seamless user experience across all devices.
+
+---
+
+# ✨ Features
+
+## 🔐 Authentication & User Management
+
+* Secure Email & Password Authentication
+* Google Sign-In
+* Password Reset
+* Protected Routes
+* Persistent User Sessions
+* User Profile Management
+* Account Settings
+* Secure Logout
+* Session Validation
+
+---
+
+## 📊 User Dashboard
+
+Users can:
+
+* View submitted requests
+* Track project progress
+* Update profile information
+* Manage account settings
+* Monitor request status
+* Access personalized dashboard content
+
+---
+
+## 💼 Services
+
+The platform showcases a range of digital services including:
+
+* Website Design & Development
+* Search Engine Optimization (SEO)
+* Google Ads Management
+* Meta Ads Campaigns
+* Social Media Marketing
+* Branding & Identity Design
+* Performance Marketing
+* AI Automation Solutions
+* Business Growth Consulting
+
+---
+
+## 📈 Lead Qualification System
+
+Instead of directly booking meetings, visitors first complete a structured inquiry form that collects:
+
+* Business Name
+* Contact Information
+* Industry
+* Business Goals
+* Project Requirements
+* Budget
+* Timeline
+
+This approach helps qualify leads and ensures every consultation is productive.
+
+---
+
+## 📚 Case Studies
+
+Visitors can explore:
+
+* Business challenges
+* Implemented solutions
+* Technologies used
+* Project outcomes
+* Client success stories
+
+---
+
+## 🎨 Modern User Experience
+
+* Responsive Design
+* Smooth Animations
+* Interactive Components
+* Premium Dark Theme
+* Loading States
+* Skeleton Screens
+* Toast Notifications
+* Scroll-to-Top Button
+* Mobile-Friendly Navigation
+
+---
+
+## ⚡ Performance Optimizations
+
+* Dynamic Imports
+* Lazy Loading
+* Optimized Images
+* Code Splitting
+* Efficient Routing
+* Fast Rendering
+* SEO-Friendly Structure
+
+---
+
+## 🔒 Security Features
+
+* Protected API Routes
+* Authentication Middleware
+* Input Validation
+* Session Verification
+* Secure Password Reset
+* Error Handling
+* Server-Side Authentication Checks
+
+---
+
+# 🛠️ Tech Stack
+
+### Frontend
+
+* Next.js (App Router)
+* React
+* TypeScript
+* Tailwind CSS
+* Framer Motion
+
+### Backend
+
+* Next.js API Routes
+* Supabase Authentication
+* Supabase PostgreSQL
+
+### Deployment
+
+* Vercel
+
+### Tools & Services
+
+* Google Authentication
+* Razorpay (Payment Integration)
+* Google Analytics
+* AI-Assisted Development Workflow
+* Git & GitHub
+
+---
+
+# 📁 Project Structure
+
+```text
+pixen-india-digital/
+│
+├── app/
+├── components/
+├── contexts/
+├── hooks/
+├── lib/
+├── public/
+├── styles/
+├── middleware.ts
+├── next.config.js
+├── package.json
+└── README.md
+```
+
+---
+
+# 🚀 Getting Started
+
+## Clone the Repository
+
+```bash
+git clone https://github.com/beingmaroof/pixen-india-digital.git
+```
+
+## Navigate to the Project
+
+```bash
+cd pixen-india-digital
+```
+
+## Install Dependencies
 
 ```bash
 npm install
 ```
 
-This will install all required dependencies including:
-- Next.js 14.2.3
-- React 18.3.1
-- Tailwind CSS 3.4.3
-- Firebase 10.12.0 (ready for Phase 5)
-- TypeScript 5.4.5
+## Configure Environment Variables
 
-### Step 2: Run Development Server
+Create a `.env.local` file in the project root.
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=
+
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+
+SUPABASE_SERVICE_ROLE_KEY=
+
+RAZORPAY_KEY_ID=
+
+RAZORPAY_KEY_SECRET=
+
+NEXT_PUBLIC_SITE_URL=
+```
+
+## Run the Development Server
 
 ```bash
 npm run dev
 ```
 
-The app will start at: **http://localhost:3000**
-
-### Step 3: Verify Setup
-
-You should see:
-- ✅ Homepage with hero section
-- ✅ "Turn Attention Into Revenue" headline
-- ✅ Two CTA buttons (Book Consultation, View Services)
-- ✅ "Website Under Development" notice
-- ✅ Responsive design working on mobile and desktop
-
----
-
-## 📁 Project Structure
+Open your browser and visit:
 
 ```
-c:\APP Projects\Pixen India\Pixen website\
-├── app/
-│   ├── globals.css          # Global styles with Tailwind
-│   ├── layout.tsx           # Root layout with metadata
-│   └── page.tsx             # Homepage (Phase 0 base)
-├── components/
-│   ├── Button.tsx           # Reusable button component
-│   ├── Card.tsx             # Reusable card component
-│   ├── Footer.tsx           # Footer component
-│   ├── Navbar.tsx           # Navigation bar
-│   └── Section.tsx          # Section wrapper
-├── lib/
-│   ├── firebase.ts          # Firebase config (Phase 5)
-│   └── utils.ts             # Utility functions
-├── public/                  # Static assets
-├── tailwind.config.ts       # Tailwind configuration
-├── tsconfig.json            # TypeScript config
-├── next.config.js           # Next.js config
-└── package.json             # Dependencies
+http://localhost:3000
 ```
 
 ---
 
-## 🎨 Design System
+# 📱 Responsive Design
 
-### Colors
+The website is optimized for:
 
-**Primary (Blue):**
-- Used for: Primary CTAs, links, brand elements
-- Scale: `primary-50` to `primary-900`
-
-**Accent (Red):**
-- Used for: Secondary CTAs, highlights
-- Scale: `accent-50` to `accent-900`
-
-### Custom Classes
-
-- `.btn-primary` - Primary button style
-- `.btn-secondary` - Secondary button style
-- `.container-custom` - Max-width container (7xl)
+* Desktop
+* Laptop
+* Tablet
+* Mobile Devices
 
 ---
 
-## 📱 Current Features (Phase 0)
+# 🎯 Project Goals
 
-✅ Next.js App Router setup  
-✅ Tailwind CSS with custom colors  
-✅ Global layout with SEO metadata  
-✅ Responsive homepage  
-✅ Reusable component structure  
-✅ Mobile-first design  
+The primary objectives of this project are:
 
----
-
-## 🎯 Next Phases
-
-### Phase 1: Core Components
-Build out the complete UI component library
-
-### Phase 2: Homepage
-Create the full conversion-focused homepage with all sections
-
-### Phase 3: Services Page
-Build individual service pages with Problem/Solution/Outcome format
-
-### Phase 4: Case Studies
-Add trust-building case studies with results
-
-### Phase 5: Contact + Backend
-Implement lead capture system with Firebase
-
-### Phase 6: Analytics
-Integrate Google Analytics and Meta Pixel
-
-### Phase 7: Optimization
-Performance improvements and Lighthouse optimization
-
-### Phase 8: Deployment
-Deploy to Vercel and go live
+* Build trust with potential clients
+* Improve lead quality
+* Deliver a premium browsing experience
+* Maintain fast loading speeds
+* Provide secure authentication
+* Create a scalable agency platform
 
 ---
 
-## 🔧 Available Scripts
+# 🚧 Roadmap
 
-```bash
-npm run dev      # Start development server
-npm run build    # Build for production
-npm run start    # Start production server
-npm run lint     # Run ESLint
-```
+Planned improvements include:
 
----
-
-## 🌐 Target KPIs
-
-- **Conversion Rate:** 8-12%
-- **Leads/Month:** 50-150
-- **Bounce Rate:** <45%
-- **Session Time:** >2.5 min
-
----
-
-## 📞 Support
-
-For questions or issues during setup, refer to the development plan documentation.
+* Email Verification
+* AI-Powered Lead Qualification
+* CRM Integration
+* Client Activity Tracking
+* Automated Business Audit Reports
+* Email Automation
+* Advanced Analytics Dashboard
+* Live Chat Support
+* Referral System
+* Multi-language Support
+* Progressive Web App (PWA)
+* Advanced Admin Panel
+* Client Project Tracking
+* Calendar & Meeting Integration
 
 ---
 
-**Built with ❤️ for Pixen India Digital**  
-*Turning attention into revenue, one phase at a time.*
+# 📚 What I Learned
+
+Developing this project helped strengthen my understanding of:
+
+* Full-Stack Web Development
+* Authentication Systems
+* API Development
+* Database Design
+* Responsive UI Development
+* State Management
+* Performance Optimization
+* Modern React Patterns
+* User Experience Design
+* Secure Application Development
+* Deployment using Vercel
+
+---
+
+# 🤝 Contributing
+
+Suggestions, improvements, and constructive feedback are always welcome.
+
+If you discover a bug or have ideas that could improve the project, feel free to open an issue or submit a pull request.
+
+---
+
+# 📄 License
+
+This project is proprietary and is protected under **All Rights Reserved**.
+
+The source code, design, branding, and assets may not be copied, modified, redistributed, or used commercially without prior written permission from the author.
+
+---
+
+# 👨‍💻 Author
+
+**Maroof Ahmed**
+
+BCA Student • Full Stack Web Developer
+
+GitHub: https://github.com/beingmaroof
+
+LinkedIn: *(Add your LinkedIn profile URL here)*
+
+Portfolio: https://pixenindiadigital.vercel.app
+
+---
+
+### ⭐ If you found this project interesting, consider giving it a star on GitHub. It helps others discover the project and supports future development.
