@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import React from "react";
 import Script from "next/script";
+import { Analytics } from '@vercel/analytics/next';
 import { AuthProvider } from '@/contexts/AuthContext';
 import FloatingSocialIcons from '@/components/FloatingSocialIcons';
 import CursorFollower from '@/components/CursorFollower';
@@ -190,6 +191,7 @@ export default function RootLayout({
           />
           <ScrollToTop />
         </AuthProvider>
+        <Analytics />
       </body>
     </html>
   );
